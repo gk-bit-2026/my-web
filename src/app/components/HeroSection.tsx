@@ -37,20 +37,22 @@ export function HeroSection() {
         />
       </div>
 
-      {/* 2. Top Slogan: Editorial Serif Style */}
-      <motion.div
-        style={{ opacity }}
-        className="relative z-10 text-center mb-8 px-4"
-      >
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-sm md:text-base tracking-[0.3em] uppercase font-light text-zinc-400"
-        >
-          Perspective / Purpose / Perfection
-        </motion.p>
-      </motion.div>
+      {/* 2. Top Slogan: Brutalist Bold Style */}
+<motion.div
+  style={{ opacity }}
+  className="relative z-10 text-center mb-8 px-4"
+>
+  <motion.p 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+    // CHANGED: font-black for maximum weight, text-zinc-200 for "Darker" contrast against black
+    className="text-xs md:text-sm tracking-[0.5em] uppercase font-black text-zinc-200 border-b border-white/10 pb-2 inline-block"
+    style={{ fontFamily: "'Inter', sans-serif" }}
+  >
+    Perspective / Purpose / Perfection
+  </motion.p>
+</motion.div>
 
       {/* 3. Main Heading: The "Graphikardia" Reveal */}
       <motion.div
