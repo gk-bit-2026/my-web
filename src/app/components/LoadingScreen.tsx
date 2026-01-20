@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useState } from 'react';
-import logoImage from 'figma:asset/23a08fc2e7fa53ce51f5f86dc55e2fc16af4e83a.png';
+import logoImage from 'https://raw.githubusercontent.com/gk-bit-2026/my-web/0c69840730966728c32a1e2598807aac53999334/src/assets/logo-1';
 
 interface LoadingScreenProps {
   onComplete: () => void;
