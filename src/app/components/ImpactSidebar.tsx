@@ -3,7 +3,7 @@ import { X, ShoppingCart, Trash2, Send, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
 // PASTE YOUR DEPLOYED WEB APP URL HERE
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwXuoYFVbytBFKXImg7MFZWIVYdk4q740KmBjtqvhAVPthAWXsVSV-t3dmSwNLlomZsQ/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztfYnOUTNXbgTBIfj0w2hMjpmsPKAp5HPQRa7tj1VBFD9rFc2s5HHJAXiQ89X6qcK2zA/exec';
 
 interface Product {
   id: number;
