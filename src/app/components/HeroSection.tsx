@@ -37,7 +37,7 @@ export function HeroSection() {
         />
       </div>
 
-      {/* 2. Top Slogan: Brutalist Bold Style */}
+     {/* 2. Top Slogan: Brutalist Bold Style */}
 <motion.div
   style={{ opacity }}
   className="relative z-10 text-center mb-8 px-4"
@@ -46,8 +46,11 @@ export function HeroSection() {
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-    // CHANGED: font-black for maximum weight, text-zinc-200 for "Darker" contrast against black
-    className="text-xs md:text-sm tracking-[0.5em] uppercase font-black text-zinc-200 border-b border-white/10 pb-2 inline-block"
+    /* UPDATED: 
+       - text-black: for the requested color 
+       - border-black/10: changed from white/10 so the underline is visible
+    */
+    className="text-xs md:text-sm tracking-[0.5em] uppercase font-black text-black border-b border-black/10 pb-2 inline-block"
     style={{ fontFamily: "'Inter', sans-serif" }}
   >
     Perspective / Purpose / Perfection
