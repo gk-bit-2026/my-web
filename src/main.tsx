@@ -1,16 +1,14 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "./app/App.tsx"; // DOUBLE CHECK THIS PATH
+import App from "./App.tsx"; // Simplified path
 import "./styles/index.css";
 
-const rootElement = document.getElementById("root");
+const container = document.getElementById("root");
+if (!container) throw new Error("Target container 'root' not found");
 
-if (!rootElement) {
-  console.error("Critical Error: Root element not found. Your index.html might be missing <div id='root'></div>");
-} else {
-  createRoot(rootElement).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-}
+const root = createRoot(container);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
