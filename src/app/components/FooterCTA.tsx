@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useRef, useEffect } from 'react';
-import logoWhite from '../assets/logo-1.png';
+import logoWhite from '../assets/logo2.png';
 
 export function FooterCTA() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
