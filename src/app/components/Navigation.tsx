@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import logoBlack from '../assets/logo1.png';
+import logoBlack from '@/assets/logo1.png';
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
