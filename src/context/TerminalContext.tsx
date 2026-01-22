@@ -11,7 +11,8 @@ const DEFAULT_DATA = {
     { name: "Founder_X", quote: "System absolute. Performance unmatched." }
   ],
   stats: { projects: "42", clients: "12", regions: "IN-SOUTH-1" },
-  // ADDED: Theme defaults
+  // ADDED: Theme 
+
   appearance: { 
     accentColor: "#a855f7", 
     isDark: true,
