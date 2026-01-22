@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playwrite+NZ:wght@100..400&family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+NZ:wght@100..400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +11,7 @@
 
 html {
   scroll-behavior: smooth;
-  cursor: none; /* Hide default cursor to use our custom one */
+  cursor: none; /* ⚠️ CRITICAL: This hides the mouse. Ensure CustomCursor.tsx is working! */
 }
 
 body {
@@ -18,23 +19,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* Prevents horizontal scroll on mobile animations */
 }
 
-/* Custom Selection Color */
+/* Custom Selection Color (Inverted Style) */
 ::selection {
   background: #ffffff;
   color: #000000;
 }
 
-/* Branding Typography */
-.font-display {
-  font-family: 'Space Grotesk', sans-serif;
-  letter-spacing: -0.05em;
-}
-
-/* Scrollbar Engineering */
+/* Global Scrollbar Engineering */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px; /* Slightly thinner for a sleeker look */
 }
 ::-webkit-scrollbar-track {
   background: #050505;
@@ -45,4 +41,13 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Utility for hiding scrollbar but keeping functionality (optional use) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
