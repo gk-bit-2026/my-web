@@ -1,103 +1,82 @@
-import { motion } from 'framer-motion';
+'use client';
 
-const roles = [
-  "Viral Strategy",
-  "UI/UX Architecture",
-  "Motion Systems",
-  "Revenue Ops"
-];
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 
 export function HeroSection({ isDark }: { isDark: boolean }) {
-  // Animation variants for the staggering effect
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.5
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
+  const containerRef = useRef(null);
+  const { scrollY } = useScroll();
+  
+  // Parallax effects
+  const y1 = useTransform(scrollY, [0, 500], [0, -100]);
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   return (
-    <section className="relative h-screen min-h-[800px] flex items-center justify-center overflow-hidden px-4">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 z-0">
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] rounded-full blur-[120px] opacity-20 animate-pulse
-          ${isDark ? 'bg-purple-900' : 'bg-purple-300'}
-        `} />
+    <section ref={containerRef} className="relative h-screen flex items-center justify-center overflow-hidden px-4">
+      {/* Dynamic Pulse Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.2, 0.1] 
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] rounded-full blur-[120px] ${isDark ? 'bg-purple-600' : 'bg-purple-400'}`} 
+        />
+        {/* EKG Grid Overlay */}
+        <div className="absolute inset-0 opacity-[0.05]" 
+             style={{ backgroundImage: `linear-gradient(${isDark ? '#fff' : '#000'} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? '#fff' : '#000'} 1px, transparent 1px)`, backgroundSize: '50px 50px' }} />
       </div>
 
-      <div className="relative z-10 text-center max-w-7xl mx-auto">
-        {/* Top Tagline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="font-mono text-[10px] md:text-sm tracking-[0.4em] uppercase mb-6 md:mb-10 opacity-60"
-        >
-          Global Digital Narrative Engine
-        </motion.div>
-        
-        {/* Main Title */}
-        <motion.h1 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="text-[13vw] leading-[0.8] font-black uppercase tracking-tighter italic text-transparent bg-clip-text bg-gradient-to-b from-current to-current/50 mb-8"
-        >
-          Graphi<br/>Kardia<span className="text-purple-600">.</span>
-        </motion.h1>
+      <motion.div style={{ y: y1, opacity }} className="relative z-10 text-center w-full max-w-[100vw]">
+        {/* Top HUD Display */}
+        <div className="flex justify-center gap-12 mb-12 overflow-hidden">
+          {["System_Active", "Lat_40.7128", "Narrative_Engaged"].map((stat) => (
+            <motion.span key={stat} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 0.4 }}
+              className="font-mono text-[9px] uppercase tracking-[0.3em]">{stat}</motion.span>
+          ))}
+        </div>
 
-        {/* ROLES / SERVICES LIST (Restored & Upgraded) */}
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="flex flex-wrap justify-center gap-4 md:gap-8 mb-12"
-        >
-          {roles.map((role, i) => (
+        {/* MAIN TITLE: Single Line Innovative Look */}
+        <div className="relative group">
+          <motion.h1 
+            initial={{ letterSpacing: "0.5em", opacity: 0, filter: "blur(10px)" }}
+            animate={{ letterSpacing: "-0.02em", opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[14vw] md:text-[11vw] font-black uppercase italic leading-none tracking-tighter"
+          >
+            Graphikardia
+            {/* The Animated "Heartbeat" Scanline */}
             <motion.div 
-              key={role}
-              variants={item}
-              className="flex items-center gap-2"
-            >
-              {/* The Separator (Dot) - Hidden on the first item */}
-              {i > 0 && <span className="w-1.5 h-1.5 rounded-full bg-purple-500/50 hidden md:block" />}
-              
-              <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest border border-current/20 px-3 py-1 rounded-full bg-current/5 backdrop-blur-sm">
-                {role}
-              </span>
+              animate={{ left: ['-10%', '110%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+              className="absolute top-0 bottom-0 w-1 bg-purple-500 shadow-[0_0_20px_#a855f7] z-20 mix-blend-screen"
+            />
+          </motion.h1>
+          
+          {/* Ghost Reflection for depth */}
+          <h1 className="absolute top-0 left-0 w-full text-[14vw] md:text-[11vw] font-black uppercase italic leading-none tracking-tighter opacity-[0.03] blur-sm translate-x-2 translate-y-2 pointer-events-none">
+            Graphikardia
+          </h1>
+        </div>
+
+        {/* Roles with "Scanning" effect */}
+        <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4 max-w-2xl mx-auto px-6">
+          {["Viral Strategy", "UI/UX Architecture", "Motion Systems"].map((role, i) => (
+            <motion.div key={role} initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 1 + (i * 0.2) }}
+              className="flex items-center gap-3">
+              <span className="w-1 h-1 bg-purple-600 rounded-full animate-ping" />
+              <span className="font-mono text-[10px] uppercase tracking-widest">{role}</span>
             </motion.div>
           ))}
-        </motion.div>
-
-        {/* Description */}
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="max-w-xl mx-auto text-sm md:text-lg font-light leading-relaxed opacity-80"
-        >
-          We transform brands from <span className="font-bold italic">Invisible</span> to <span className="font-bold italic">Inevitable</span>. 
-          Specializing in high-velocity content, brutalist web design, and market dominance.
-        </motion.p>
-      </div>
-
-      {/* Scroll Indicator */}
-      <motion.div 
-        animate={{ y: [0, 10, 0] }} 
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-widest opacity-40"
-      >
-        Scroll_to_Explore
+        </div>
       </motion.div>
+
+      {/* Side HUD Elements */}
+      <div className="absolute left-10 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-20 opacity-20 font-mono text-[9px] uppercase vertical-text">
+        <p>Innovation_Standard_2024</p>
+        <p>Brutalist_Vibration_Scale: 0.98</p>
+      </div>
     </section>
   );
 }
