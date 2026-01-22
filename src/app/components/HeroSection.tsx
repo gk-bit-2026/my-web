@@ -1,96 +1,149 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Data mapping for Regions
-const content = {
-  IN: [
-    { title: 'digital marketer', description: 'Helping Indian brands dominate the local market with precision.', color: '#ec4899' },
-    { title: 'growth hacker', description: 'Scaling startups across the subcontinent at lightning speed.', color: '#22c55e' }
-  ],
-  INTL: [
-    { title: 'global strategist', description: 'Positioning your brand for the international stage.', color: '#3b82f6' },
-    { title: 'creative director', description: 'World-class visual storytelling for global audiences.', color: '#f59e0b' }
-  ]
-};
+const roles = [
+  { word: "GRAPHIKARDIA", sub: "Visual Narrative", desc: "Crafting unique visual stories that resonate.", color: "#ec4899" },
+  { word: "PERFORMANCE", sub: "Growth Hacking", desc: "Dominating the digital space with data-driven ROI.", color: "#22c55e" },
+  { word: "STRATEGIZING", sub: "Brand Identity", desc: "Building personalities that customers trust.", color: "#3b82f6" },
+  { word: "ACCELERATION", sub: "Market Entry", desc: "Fast-tracking your brand into new territories.", color: "#f59e0b" },
+  { word: "OUTSMARTING", sub: "Digital Edge", desc: "Using advanced tech to lead the competition.", color: "#06b6d4" }
+];
 
-interface HeroProps { isDark: boolean; region: 'IN' | 'INTL'; }
-
-export function HeroSection({ isDark, region }: HeroProps) {
+export function HeroSection({ isDark }: { isDark: boolean }) {
   const [index, setIndex] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const currentRoles = content[region];
+  const ROTATION_TIME = 4500;
+  const maxChars = 12;
+
+  // MOUSE PHYSICS
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 100 });
+  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 100 });
+
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setIndex((prev) => (prev + 1) % roles.length);
+    }, ROTATION_TIME);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % currentRoles.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [region, currentRoles.length]);
+    startTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      containerRef.current.style.setProperty('--x', `${e.clientX - rect.left}px`);
-      containerRef.current.style.setProperty('--y', `${e.clientY - rect.top}px`);
-      containerRef.current.style.setProperty('--op', '1');
+      // Normalize values from -0.5 to 0.5
+      mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+      mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
     }
+  };
+
+  const handleManualNav = (direction: 'next' | 'prev') => {
+    if (direction === 'next') setIndex((prev) => (prev + 1) % roles.length);
+    else setIndex((prev) => (prev - 1 + roles.length) % roles.length);
+    startTimer();
   };
 
   return (
     <div 
       ref={containerRef}
       onPointerMove={handlePointerMove}
-      onPointerLeave={() => containerRef.current?.style.setProperty('--op', '0')}
-      className="relative h-fit py-16 md:py-24 flex flex-col items-center justify-center overflow-hidden cursor-none"
-      style={{ '--x': '0px', '--y': '0px', '--op': '0' } as any}
+      onPointerLeave={() => { mouseX.set(0); mouseY.set(0); }}
+      className="relative min-h-[75vh] py-16 flex flex-col items-center justify-center overflow-hidden cursor-crosshair"
     >
-      {/* Lag-free Background Mesh */}
-      <div 
-        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-        style={{ 
-          background: `radial-gradient(circle 350px at var(--x) var(--y), ${currentRoles[index].color}, transparent 80%)`,
-          opacity: 'calc(var(--op) * 0.15)'
-        }}
-      />
-
-      <div className="relative z-10 text-center px-4 w-full select-none">
-        <h1 className="text-[14vw] md:text-[9vw] font-black uppercase tracking-tighter leading-[0.8]">
-          Graphikardia
-        </h1>
-
-        <div className="mt-8 relative min-h-[180px] flex flex-col items-center justify-center">
-          <AnimatePresence mode="wait">
-            <motion.div key={`${region}-${index}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="relative">
-                <h2 
-                  className="text-5xl md:text-[10rem] lowercase leading-none py-4"
-                  style={{ 
-                    fontFamily: '"Playwrite NZ", cursive', 
-                    color: currentRoles[index].color,
-                    WebkitMaskImage: `radial-gradient(circle 180px at var(--x) var(--y), black 20%, transparent 100%)`,
-                    maskImage: `radial-gradient(circle 180px at var(--x) var(--y), black 20%, transparent 100%)`
-                  }}
-                >
-                  {currentRoles[index].title}
-                </h2>
-                <h2 className="absolute inset-0 text-5xl md:text-[10rem] lowercase leading-none py-4 opacity-[0.05] pointer-events-none flex items-center justify-center"
-                    style={{ fontFamily: '"Playwrite NZ", cursive', color: isDark ? '#fff' : '#000', zIndex: -1 }}>
-                  {currentRoles[index].title}
-                </h2>
-              </div>
-              <p className={`mt-4 text-sm md:text-xl font-bold max-w-lg transition-colors ${isDark ? 'text-zinc-500' : 'text-zinc-800'}`}>
-                {currentRoles[index].description}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* 1. SLOGAN */}
+      <div className="max-w-4xl text-center mb-16 px-6 pointer-events-none">
+        <motion.p 
+          key={index}
+          className="text-xl md:text-3xl font-black leading-tight bg-clip-text text-transparent"
+          style={{ 
+            backgroundImage: `linear-gradient(90deg, ${isDark ? '#fff' : '#000'} 0%, ${roles[index].color} 50%, ${isDark ? '#fff' : '#000'} 100%)`,
+            WebkitBackgroundClip: 'text',
+            backgroundSize: '200% auto',
+            animation: 'shimmer 4s linear infinite'
+          }}
+        >
+          "Crafting a unique visual narrative for your business that resonates with your audience and dominates the digital space."
+        </motion.p>
       </div>
 
-      {/* Custom Cursor */}
-      <div className="fixed top-0 left-0 w-6 h-6 border border-current rounded-full pointer-events-none z-50 transition-opacity"
-           style={{ transform: 'translate(calc(var(--x) - 50%), calc(var(--y) - 50%))', opacity: 'var(--op)' }} />
+      {/* 2. 3D GRID WITH TILT */}
+      <div className="relative group flex items-center gap-4 md:gap-12">
+        <button onClick={() => handleManualNav('prev')} className={`p-2 rounded-full border transition-all ${isDark ? 'border-white/10 hover:bg-white/10' : 'border-black/10 hover:bg-black/10'} opacity-0 group-hover:opacity-100 hidden md:block`}>
+          <ChevronLeft size={32} />
+        </button>
+
+        <div className="relative">
+          <div className="flex gap-1 md:gap-2" style={{ perspective: '1200px' }}>
+            {Array.from({ length: maxChars }).map((_, charIdx) => {
+              // Individual Tilt Logic
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const rotateY = useTransform(smoothX, [-0.5, 0.5], [-20, 20]);
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const rotateX = useTransform(smoothY, [-0.5, 0.5], [20, -20]);
+
+              return (
+                <motion.div 
+                  key={charIdx} 
+                  className="w-7 h-11 md:w-16 md:h-24 relative" 
+                  style={{ transformStyle: 'preserve-3d', rotateX, rotateY }}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${index}-${charIdx}`}
+                      initial={{ rotateX: 90, opacity: 0 }}
+                      animate={{ rotateX: 0, opacity: 1 }}
+                      exit={{ rotateX: -90, opacity: 0 }}
+                      transition={{ duration: 0.6, delay: charIdx * 0.04, ease: [0.23, 1, 0.32, 1] }}
+                      className={`absolute inset-0 flex items-center justify-center border-2 ${
+                        isDark ? 'border-white/10 bg-zinc-900/50 text-white' : 'border-black/10 bg-zinc-100 text-black'
+                      } font-black text-xl md:text-6xl rounded-md shadow-xl select-none`}
+                    >
+                      {roles[index].word.padEnd(maxChars, " ")[charIdx]}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* PROGRESS BAR */}
+          <div className="absolute -bottom-6 left-0 w-full h-[2px] bg-current opacity-10">
+            <motion.div key={index} initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: ROTATION_TIME / 1000, ease: "linear" }}
+              className="h-full" style={{ backgroundColor: roles[index].color }} />
+          </div>
+        </div>
+
+        <button onClick={() => handleManualNav('next')} className={`p-2 rounded-full border transition-all ${isDark ? 'border-white/10 hover:bg-white/10' : 'border-black/10 hover:bg-black/10'} opacity-0 group-hover:opacity-100 hidden md:block`}>
+          <ChevronRight size={32} />
+        </button>
+      </div>
+
+      {/* 3. SYNCED DESCRIPTION */}
+      <div className="mt-20 text-center min-h-[120px] px-8">
+        <AnimatePresence mode="wait">
+          <motion.div key={index} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center">
+            <h3 className="text-2xl md:text-4xl font-black uppercase tracking-widest" style={{ color: roles[index].color }}>
+              {roles[index].sub}
+            </h3>
+            <p className="text-base md:text-xl font-medium opacity-70 max-w-lg leading-relaxed mt-4">
+              {roles[index].desc}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <style jsx>{`
+        @keyframes shimmer { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+      `}</style>
     </div>
   );
 }
