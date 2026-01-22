@@ -1,12 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap');
+/* 1. DISPLAY & HEADLINES: Syne (Ultra Bold) or Space Grotesk */
+/* Using Syne for that "Innovative Agency" wide look */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Space+Grotesk:wght@300;500;700&display=swap');
 
-/* Nadira - Using Orbitron as a stylish display font alternative */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+/* 2. INTERFACE & HUD: JetBrains Mono (Technical/Modern) */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
-/* Garet - Using Inter as a modern geometric alternative */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* 3. NARRATIVE & BODY: Inter (Precision Geometric) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;900&display=swap');
 
-/* Breul Grotesk - Using Space Grotesk as a modern grotesque alternative */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
+/* 4. ACCENT: Playwrite NZ (Cursive/Handwritten) */
 @import url('https://fonts.googleapis.com/css2?family=Playwrite+NZ:wght@100..400&display=swap');
+
+/* GLOBAL UTILITIES FOR INNOVATIVE HERO */
+@layer base {
+  :root {
+    --font-display: 'Syne', sans-serif;
+    --font-interface: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, .font-display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+  }
+
+  .font-mono {
+    font-family: var(--font-interface);
+  }
+}
+
+/* KINETIC UTILITIES */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.bg-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
