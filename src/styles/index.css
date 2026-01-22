@@ -5,63 +5,49 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --cursor-color: white;
-    /* Font Variables for tailwind.config.ts */
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-interface: 'Inter', monospace;
-    --font-accent: 'Space Grotesk', sans-serif;
-  }
-
-  /* FIX: Force default background and text colors. 
-     If this is missing, the screen may appear white/blank 
-     because text is white but background isn't black yet.
-  */
-  html {
-    background-color: #050505;
-    color: white;
-    scroll-behavior: smooth;
-    cursor: none; 
-  }
-
-  body {
-    @apply bg-[#050505] text-white antialiased;
-    font-family: var(--font-body);
-    margin: 0;
-    text-rendering: optimizeLegibility;
-    overflow-x: hidden;
-    min-h-screen;
-  }
+:root {
+  --cursor-color: white;
 }
 
-/* Custom Selection Color */
+html {
+  scroll-behavior: smooth;
+  cursor: none; /* ⚠️ CRITICAL: This hides the mouse. Ensure CustomCursor.tsx is working! */
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* Prevents horizontal scroll on mobile animations */
+}
+
+/* Custom Selection Color (Inverted Style) */
 ::selection {
-  background: #ffffff;
-  color: #000000;
+  background: #ffffff;
+  color: #000000;
 }
 
 /* Global Scrollbar Engineering */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 4px; /* Slightly thinner for a sleeker look */
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #050505;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
+  background: #333;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #555;
 }
 
-/* Utility for hiding scrollbar */
+/* Utility for hiding scrollbar but keeping functionality (optional use) */
 .no-scrollbar::-webkit-scrollbar {
-  display: none;
+  display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
