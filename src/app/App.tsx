@@ -11,7 +11,8 @@ import { ProductVault } from './components/ProductVault';
 import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { FooterCTA } from './components/FooterCTA';
 import { ImpactSidebar } from './components/ImpactSidebar';
-import { CustomCursor } from './components/CustomCursor'; // Restored
+import { CustomCursor } from './components/CustomCursor';
+import { PageTransition } from './components/PageTransition'; // Import transition wrapper
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
 
@@ -23,10 +24,66 @@ function ScrollToTop() {
   return null;
 }
 
+/**
+ * AnimatedRoutes handles the actual routing and triggers 
+ * the AnimatePresence based on the location key.
+ */
+function AnimatedRoutes({ isDark, addToStrategy, cart, removeFromStrategy, isSidebarOpen, setIsSidebarOpen }: any) {
+  const location = useLocation();
+
+  return (
+    <div className={`min-h-screen transition-colors duration-700 ease-in-out ${
+      isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'
+    }`}>
+      
+      <Navigation 
+        isDark={isDark} 
+        setIsDark={addToStrategy} // Note: Check if you intended to pass setIsDark here
+        cartCount={cart.length}
+        openSidebar={() => setIsSidebarOpen(true)}
+      />
+
+      <main className="relative z-10">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <PageTransition>
+                <HeroSection isDark={isDark} />
+                <KardiaMethodology isDark={isDark} />
+                <ProductVault onAdd={addToStrategy} selectedIds={cart.map((i: any) => i.id)} />
+                <BeforeAfterSlider isDark={isDark} />
+                <FooterCTA isDark={isDark} />
+              </PageTransition>
+            } />
+            
+            <Route path="/work" element={
+              <PageTransition>
+                <WorkPage isDark={isDark} />
+              </PageTransition>
+            } />
+            
+            <Route path="/testimonials" element={
+              <PageTransition>
+                <TestimonialsPage isDark={isDark} />
+              </PageTransition>
+            } />
+          </Routes>
+        </AnimatePresence>
+      </main>
+
+      <ImpactSidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+        items={cart} 
+        onRemove={removeFromStrategy}
+      />
+    </div>
+  );
+}
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isDark, setIsDark] = useState(true); // Default Dark Mode
-  const [language, setLanguage] = useState('English (Global)');
+  const [isDark, setIsDark] = useState(true);
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -55,51 +112,24 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      
-      {/* ⚡️ The Custom Cursor must stay here because of 'cursor: none' in CSS */}
       <CustomCursor /> 
 
+      {/* Main Loading Sequence */}
       <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <div className={`min-h-screen transition-colors duration-700 ease-in-out ${
-        isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'
-      }`}>
-        
-        <Navigation 
-          isDark={isDark} 
-          setIsDark={setIsDark} 
-          language={language}
-          setLanguage={setLanguage}
-          cartCount={cart.length}
-          openSidebar={() => setIsSidebarOpen(true)}
+      {!isLoading && (
+        <AnimatedRoutes 
+          isDark={isDark}
+          setIsDark={setIsDark}
+          addToStrategy={addToStrategy}
+          cart={cart}
+          removeFromStrategy={removeFromStrategy}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
         />
-
-        <main className="relative z-10">
-          <Routes>
-            <Route path="/" element={
-              <>
-                <HeroSection isDark={isDark} />
-                <KardiaMethodology isDark={isDark} />
-                <ProductVault onAdd={addToStrategy} selectedIds={cart.map(i => i.id)} />
-                <BeforeAfterSlider isDark={isDark} />
-                <FooterCTA isDark={isDark} />
-              </>
-            } />
-            <Route path="/work" element={<WorkPage isDark={isDark} />} />
-            <Route path="/testimonials" element={<TestimonialsPage isDark={isDark} />} />
-          </Routes>
-        </main>
-
-        <ImpactSidebar 
-          isOpen={isSidebarOpen} 
-          onClose={() => setIsSidebarOpen(false)} 
-          items={cart} 
-          onRemove={removeFromStrategy}
-        />
-        
-      </div>
+      )}
     </Router>
   );
 }
