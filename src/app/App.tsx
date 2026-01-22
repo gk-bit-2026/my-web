@@ -12,10 +12,13 @@ import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { FooterCTA } from './components/FooterCTA';
 import { ImpactSidebar } from './components/ImpactSidebar';
 import { CustomCursor } from './components/CustomCursor';
-import { PageTransition } from './components/PageTransition'; // Import transition wrapper
+import { PageTransition } from './components/PageTransition';
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
 
+/**
+ * Ensures page resets to top on route change
+ */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -28,7 +31,15 @@ function ScrollToTop() {
  * AnimatedRoutes handles the actual routing and triggers 
  * the AnimatePresence based on the location key.
  */
-function AnimatedRoutes({ isDark, addToStrategy, cart, removeFromStrategy, isSidebarOpen, setIsSidebarOpen }: any) {
+function AnimatedRoutes({ 
+  isDark, 
+  setIsDark, 
+  addToStrategy, 
+  cart, 
+  removeFromStrategy, 
+  isSidebarOpen, 
+  setIsSidebarOpen 
+}: any) {
   const location = useLocation();
 
   return (
@@ -38,7 +49,7 @@ function AnimatedRoutes({ isDark, addToStrategy, cart, removeFromStrategy, isSid
       
       <Navigation 
         isDark={isDark} 
-        setIsDark={addToStrategy} // Note: Check if you intended to pass setIsDark here
+        setIsDark={setIsDark} 
         cartCount={cart.length}
         openSidebar={() => setIsSidebarOpen(true)}
       />
@@ -87,7 +98,7 @@ export default function App() {
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Theme Toggler Effect
+  // Theme Toggler Effect - Updates the root HTML element
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -116,7 +127,12 @@ export default function App() {
 
       {/* Main Loading Sequence */}
       <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
+        {isLoading && (
+          <LoadingScreen 
+            key="loader" 
+            onComplete={() => setIsLoading(false)} 
+          />
+        )}
       </AnimatePresence>
 
       {!isLoading && (
