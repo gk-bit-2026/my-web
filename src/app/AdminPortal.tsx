@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useTerminal } from '@/context/TerminalContext';
+import { useTerminal } from '../context/TerminalContext';
 import { 
   ShieldCheck, Layout, Target, Save, Video, Image as ImageIcon, 
   MessageSquare, Plus, Trash2, Search, Loader2, Eye, Map as MapIcon
