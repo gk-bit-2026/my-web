@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { Analytics } from "@vercel/analytics/react"; // 1. IMPORT VERCEL ANALYTICS
 
 // Components
 import { Navigation } from './components/Navigation';
@@ -15,7 +16,7 @@ import { CustomCursor } from './components/CustomCursor';
 import { PageTransition } from './components/PageTransition'; 
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
-import AdminPortal from './AdminPortal'; 
+import AdminPortal from './AdminPortal';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -23,20 +24,20 @@ function ScrollToTop() {
   return null;
 }
 
-// Secret Shortcut Hook
+// 2. SECRET SHORTCUT HOOK (Type 'gk' to open portal)
 function useSecretShortcut() {
   const navigate = useNavigate();
   useEffect(() => {
     let keys = '';
     const handleKeyDown = (e: KeyboardEvent) => {
       keys += e.key.toLowerCase();
-      if (keys.endsWith('silent')) { // Type 'gk' anywhere
+      if (keys.endsWith('gk')) { 
         navigate('/terminal-x');
         keys = '';
       }
-      if (keys.length > 10) keys = '';
+      if (keys.length > 8) keys = '';
     };
-    window.addEventListener('keydown', handleKeyDown);  
+    window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate]);
 }
@@ -47,11 +48,12 @@ function AnimatedRoutes({
   const location = useLocation();
   useSecretShortcut();
 
-  const isAdmin = location.pathname.includes('terminal-x');
+  const isTerminal = location.pathname.includes('terminal-x');
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'}`}>
-      {!isAdmin && (
+      {/* Hide UI on Terminal Mode */}
+      {!isTerminal && (
         <Navigation isDark={isDark} setIsDark={setIsDark} cartCount={cart.length} openSidebar={() => setIsSidebarOpen(true)} />
       )}
 
@@ -74,7 +76,7 @@ function AnimatedRoutes({
         </AnimatePresence>
       </main>
 
-      {!isAdmin && (
+      {!isTerminal && (
         <ImpactSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} items={cart} onRemove={removeFromStrategy} />
       )}
     </div>
@@ -91,9 +93,12 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <CustomCursor /> 
+      <Analytics /> {/* 3. ACTIVATE VERCEL ANALYTICS */}
+
       <AnimatePresence mode="wait">
         {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
+
       {!isLoading && (
         <AnimatedRoutes 
           isDark={isDark} setIsDark={setIsDark}
