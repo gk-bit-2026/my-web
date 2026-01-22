@@ -1,108 +1,81 @@
-import { motion, AnimatePresence } from 'motion/react';
+'use client';
+
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom'; // Added this
+import { Menu, X, Sun, Moon, Globe } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import logoBlack from '@/assets/logo1.png';
 
-export function Navigation() {
+interface NavProps {
+  isDark: boolean;
+  setIsDark: (v: boolean) => void;
+  region: 'IN' | 'INTL';
+  setRegion: (v: 'IN' | 'INTL') => void;
+}
+
+export function Navigation({ isDark, setIsDark, region, setRegion }: NavProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation(); // To detect which page we are on
+  const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // UPDATED: Added real paths for the new pages
   const navItems = [
-    { label: 'Home', href: '/' },
     { label: 'Work', href: '/work' },
     { label: 'Testimonials', href: '/testimonials' },
-    { label: 'Methodology', href: '/#methodology' },
     { label: 'Contact', href: '/#contact' }
   ];
 
   return (
     <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-lg border-b border-black/10 shadow-lg' : 'bg-white/80 backdrop-blur-md'
-      }`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+        isScrolled 
+          ? (isDark ? 'bg-zinc-950/90 border-b border-white/10' : 'bg-white/90 border-b border-black/10') 
+          : 'bg-transparent'
+      } backdrop-blur-md`}
     >
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        {/* Logo - Uses Link instead of a */}
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <motion.img 
-            src={logoBlack} 
-            alt="Graphikardia" 
-            className="h-10 w-auto"
-            animate={{ filter: isScrolled ? 'brightness(1)' : 'brightness(1.1)' }}
-          />
-          <motion.span
-            className="text-black text-xl hidden sm:block"
-            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, letterSpacing: '0.05em' }}
-          >
-            GRAPHIKARDIA
-          </motion.span>
+          <img src={logoBlack} alt="Graphikardia" className={`h-8 w-auto ${isDark ? 'invert' : ''}`} />
+          <span className="font-black text-lg tracking-tighter hidden sm:block">GRAPHIKARDIA</span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Controls & Nav */}
         <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item, index) => (
-            <Link
-              key={index}
-              to={item.href}
-              className={`relative uppercase text-sm font-semibold tracking-widest transition-colors group ${
-                location.pathname === item.href ? 'text-black' : 'text-black/50 hover:text-black'
-              }`}
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          {navItems.map((item) => (
+            <Link 
+              key={item.label} 
+              to={item.href} 
+              className={`text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-100 transition-opacity ${location.pathname === item.href ? 'opacity-100' : 'opacity-50'}`}
             >
               {item.label}
-              <motion.div
-                className="absolute -bottom-1 left-0 h-0.5 bg-black"
-                initial={{ width: 0 }}
-                whileHover={{ width: '100%' }}
-              />
             </Link>
           ))}
+
+          <div className="h-4 w-[1px] bg-current opacity-20" />
+
+          {/* TOGGLES */}
+          <div className="flex items-center gap-4 bg-current/5 px-3 py-1.5 rounded-full">
+            <button onClick={() => setRegion(region === 'IN' ? 'INTL' : 'IN')} className="flex items-center gap-2 text-[9px] font-bold uppercase">
+              <Globe size={12} /> {region}
+            </button>
+            <button onClick={() => setIsDark(!isDark)}>
+              {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Button */}
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-black">
+        {/* Mobile Toggle */}
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-black/10 overflow-hidden"
-          >
-            <div className="px-4 py-6 space-y-2">
-              {navItems.map((item, index) => (
-                <Link
-                  key={index}
-                  to={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-black/70 hover:text-black uppercase text-sm py-4 px-4 font-bold tracking-tighter"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.nav>
   );
 }
