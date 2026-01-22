@@ -4,21 +4,19 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
-// Global Components (Using your @ alias)
-import { LoadingScreen } from '@/components/LoadingScreen';
-import { Navigation } from '@/components/Navigation';
-import { ImpactSidebar } from '@/components/ImpactSidebar';
+// Explicit Relative Paths (Fixed for your directory structure)
+import { LoadingScreen } from './components/LoadingScreen.tsx';
+import { Navigation } from './components/Navigation.tsx';
+import { HeroSection } from './components/HeroSection.tsx';
+import { KardiaMethodology } from './components/KardiaMethodology.tsx';
+import { ProductVault } from './components/ProductVault.tsx';
+import { BeforeAfterSlider } from './components/BeforeAfterSlider.tsx';
+import { FooterCTA } from './components/FooterCTA.tsx';
+import { ImpactSidebar } from './components/ImpactSidebar.tsx';
 
-// Sections for Home Page
-import { HeroSection } from '@/components/HeroSection';
-import { KardiaMethodology } from '@/components/KardiaMethodology';
-import { ProductVault } from '@/components/ProductVault';
-import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
-import { FooterCTA } from '@/components/FooterCTA';
-
-// New Pages
-import TestimonialsPage from './TestimonialsPage';
-import WorkPage from './WorkPage';
+// Page Components
+import WorkPage from './WorkPage.tsx';
+import TestimonialsPage from './TestimonialsPage.tsx';
 
 interface Product {
   id: number;
@@ -28,6 +26,22 @@ interface Product {
   icon: React.ReactNode;
   category: string;
 }
+
+const Home = ({ 
+  handlePhaseHover, 
+  handleAddToStrategy 
+}: { 
+  handlePhaseHover: (p: number | null) => void, 
+  handleAddToStrategy: (p: Product) => void 
+}) => (
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <section id="hero" className="relative"><HeroSection /></section>
+    <section id="methodology" className="relative"><KardiaMethodology onPhaseHover={handlePhaseHover} /></section>
+    <section id="services" className="relative"><ProductVault onAddToStrategy={handleAddToStrategy} /></section>
+    <section id="results" className="relative"><BeforeAfterSlider /></section>
+    <section id="contact" className="relative"><FooterCTA /></section>
+  </motion.div>
+);
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -58,45 +72,46 @@ export default function App() {
       <div className="relative bg-black min-h-screen overflow-x-hidden">
         <Navigation />
 
-        {/* Global White Flash Effect */}
         <AnimatePresence>
           {showWhiteFlash && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] pointer-events-none"
+              className="fixed inset-0 z-50 pointer-events-none"
               style={{
                 background: `repeating-linear-gradient(0deg, white 0px, white 2px, transparent 2px, transparent 50px),
-                             repeating-linear-gradient(90deg, white 0px, white 2px, transparent 2px, transparent 50px)`
+                            repeating-linear-gradient(90deg, white 0px, white 2px, transparent 2px, transparent 50px)`
               }}
             />
           )}
         </AnimatePresence>
 
-        <Routes>
-          {/* Main Landing Page */}
-          <Route path="/" element={
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <HeroSection />
-              <KardiaMethodology onPhaseHover={handlePhaseHover} />
-              <ProductVault onAddToStrategy={handleAddToStrategy} />
-              <BeforeAfterSlider />
-              <FooterCTA />
-            </motion.div>
-          } />
-
-          {/* Dedicated Pages */}
-          <Route path="/work" element={<WorkPage />} />
-          <Route path="/testimonials" element={<TestimonialsPage />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes>
+            <Route path="/" element={<Home handlePhaseHover={handlePhaseHover} handleAddToStrategy={handleAddToStrategy} />} />
+            <Route path="/work" element={<WorkPage />} />
+            <Route path="/testimonials" element={<TestimonialsPage />} />
+          </Routes>
+        </AnimatePresence>
 
         <ImpactSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           selectedProducts={selectedProducts}
-          onRemoveProduct={(id) => setSelectedProducts(prev => prev.filter(p => p.id !== id))}
+          onRemoveProduct={(id) => setSelectedProducts(selectedProducts.filter(p => p.id !== id))}
         />
+
+        {selectedProducts.length > 0 && !isSidebarOpen && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={() => setIsSidebarOpen(true)}
+            className="fixed bottom-8 right-8 w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-lg z-30 font-bold"
+          >
+            {selectedProducts.length}
+          </motion.button>
+        )}
       </div>
     </Router>
   );
