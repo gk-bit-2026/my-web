@@ -1,58 +1,44 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { X, ShoppingCart, Trash2, Send, CheckCircle } from 'lucide-react';
+'use client';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Send, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
-// PASTE YOUR DEPLOYED WEB APP URL HERE
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztfYnOUTNXbgTBIfj0w2hMjpmsPKAp5HPQRa7tj1VBFD9rFc2s5HHJAXiQ89X6qcK2zA/exec';
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztfYnOUTNXbgTBIfj0w2hMjpmsPKAp5HPQRa7tj1VBFD9rFc2s5HHJAXiQ89X6qcK2zA/exec";
 
-interface Product {
-  id: number;
-  title: string;
-  category: string;
-}
-
-interface ImpactSidebarProps {
+interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedProducts: Product[];
-  onRemoveProduct: (id: number) => void;
+  items: any[];
+  onRemove: (id: number) => void;
 }
 
-export function ImpactSidebar({ isOpen, onClose, selectedProducts, onRemoveProduct }: ImpactSidebarProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [userInfo, setUserInfo] = useState({ name: '', email: '', brand: '' });
+export function ImpactSidebar({ isOpen, onClose, items, onRemove }: SidebarProps) {
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [formData, setFormData] = useState({ name: '', email: '', brand: '' });
 
-  const handleSubmit = async () => {
-    if (!userInfo.name || !userInfo.email) {
-      alert("Please provide at least a name and email.");
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handleLaunch = async () => {
+    if (!formData.email || items.length === 0) return;
+    
+    setStatus('submitting');
     try {
-      // mode: 'no-cors' allows the request to succeed even if Google 
-      // doesn't return the standard CORS headers.
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userInfo,
-          products: selectedProducts.map(p => ({ title: p.title, category: p.category }))
+          userInfo: formData,
+          products: items.map(i => ({ title: i.title, category: i.category })),
+          source: "Sidebar Strategy Vault"
         }),
       });
-
-      setIsSuccess(true);
+      setStatus('success');
       setTimeout(() => {
-        setIsSuccess(false);
+        setStatus('idle');
         onClose();
       }, 3000);
     } catch (error) {
-      console.error("Submission error:", error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      alert("Transmission failed. Please check connection.");
+      setStatus('idle');
     }
   };
 
@@ -60,97 +46,57 @@ export function ImpactSidebar({ isOpen, onClose, selectedProducts, onRemoveProdu
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[500]" />
+          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 30 }} className="fixed top-0 right-0 h-full w-full md:w-[500px] z-[501] bg-black text-white border-l border-white/10 flex flex-col shadow-2xl">
+            
+            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-zinc-950">
+              <h2 className="text-2xl font-black uppercase tracking-tighter italic">Tactical_Vault</h2>
+              <button onClick={onClose} className="hover:rotate-90 transition-transform"><X /></button>
+            </div>
 
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full md:w-[500px] bg-black border-l-2 border-white/20 z-50 overflow-y-auto"
-          >
-            <div className="p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart className="w-6 h-6 text-white" />
-                  <h2 className="text-2xl text-white uppercase font-bold tracking-widest" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-                    Your Strategy
-                  </h2>
-                </div>
-                <button onClick={onClose} className="text-white hover:text-white/60 transition-colors">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              {isSuccess ? (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-20">
-                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-white text-xl font-bold mb-2">STRATEGY SENT</h3>
-                  <p className="text-white/60">Check your email. Our team is reviewing your selection.</p>
+            <div className="flex-1 overflow-y-auto p-8 space-y-4">
+              {status === 'success' ? (
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="h-full flex flex-col items-center justify-center text-center">
+                  <CheckCircle2 size={64} className="text-white mb-6" />
+                  <h3 className="text-3xl font-black uppercase italic">Transmitted</h3>
+                  <p className="text-zinc-500 font-mono text-xs mt-4 uppercase tracking-widest">Our engineers are reviewing your strategy.</p>
                 </motion.div>
               ) : (
                 <>
-                  {/* Products List */}
-                  <div className="space-y-4 mb-10">
-                    {selectedProducts.map((product) => (
-                      <motion.div key={product.id} layout className="bg-white/5 border border-white/10 p-4 rounded-lg flex items-start justify-between group">
+                  {items.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.5em]">Vault_Empty</span>
+                    </div>
+                  ) : (
+                    items.map(item => (
+                      <motion.div layout key={item.id} className="p-6 bg-zinc-900 border border-white/5 rounded-2xl flex justify-between items-center group hover:border-white/20 transition-all">
                         <div>
-                          <h3 className="text-white font-semibold" style={{ fontFamily: "'Montserrat', sans-serif" }}>{product.title}</h3>
-                          <p className="text-white/60 text-sm">{product.category}</p>
+                          <h4 className="font-black uppercase italic text-lg leading-none">{item.title}</h4>
+                          <span className="text-[10px] font-mono opacity-40 uppercase tracking-widest mt-2 block">{item.category}</span>
                         </div>
-                        <button onClick={() => onRemoveProduct(product.id)} className="text-white/40 hover:text-red-500 transition-colors">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <button onClick={() => onRemove(item.id)} className="p-2 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"><Trash2 size={18} /></button>
                       </motion.div>
-                    ))}
-                  </div>
-
-                  {selectedProducts.length > 0 && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-8 border-t border-white/20">
-                      <div className="space-y-4">
-                        <input 
-                          type="text" 
-                          placeholder="FULL NAME" 
-                          className="w-full bg-transparent border-b border-white/30 py-3 text-white focus:border-white outline-none transition-all uppercase text-sm tracking-widest"
-                          onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
-                        />
-                        <input 
-                          type="email" 
-                          placeholder="WORK EMAIL" 
-                          className="w-full bg-transparent border-b border-white/30 py-3 text-white focus:border-white outline-none transition-all uppercase text-sm tracking-widest"
-                          onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="BRAND / WEBSITE" 
-                          className="w-full bg-transparent border-b border-white/30 py-3 text-white focus:border-white outline-none transition-all uppercase text-sm tracking-widest"
-                          onChange={(e) => setUserInfo({...userInfo, brand: e.target.value})}
-                        />
-                      </div>
-
-                      <button
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || selectedProducts.length === 0}
-                        className="w-full py-5 bg-white text-black font-bold uppercase hover:bg-black hover:text-white border-2 border-white transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                      >
-                        {isSubmitting ? "TRANSMITTING..." : (
-                          <>
-                            <Send className="w-4 h-4" />
-                            Request Consultation
-                          </>
-                        )}
-                      </button>
-                    </motion.div>
+                    ))
                   )}
                 </>
               )}
             </div>
+
+            {items.length > 0 && status !== 'success' && (
+              <div className="p-8 border-t border-white/5 bg-zinc-950 space-y-4">
+                <div className="grid grid-cols-1 gap-3">
+                  <input type="text" placeholder="NAME / BRAND" className="w-full bg-zinc-900 border border-white/10 p-4 font-mono text-xs uppercase tracking-widest focus:border-white outline-none transition-all" onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <input type="email" placeholder="WORK EMAIL" className="w-full bg-zinc-900 border border-white/10 p-4 font-mono text-xs uppercase tracking-widest focus:border-white outline-none transition-all" onChange={e => setFormData({...formData, email: e.target.value})} />
+                </div>
+                <button 
+                  disabled={status === 'submitting'}
+                  onClick={handleLaunch} 
+                  className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.3em] text-xs hover:bg-zinc-200 transition-all flex justify-center items-center gap-3"
+                >
+                  {status === 'submitting' ? <Loader2 className="animate-spin" /> : "Initialize Impact"}
+                </button>
+              </div>
+            )}
           </motion.div>
         </>
       )}
