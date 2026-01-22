@@ -1,64 +1,53 @@
-'use client';
-
-import { useRef, useState } from 'react';
-import { motion } from 'motion/react';
-import { Volume2, VolumeX, Quote, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Quote, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const testimonials = [
-  { id: 1, name: 'Sarah Chen', role: 'CMO', company: 'Aether Intel', content: "Graphikardia decoded our entire market position. Growth was immediate.", videoSrc: '/videos/sarah.mp4', size: 'large' },
-  { id: 2, name: 'Marcus Thorne', role: 'Founder', company: 'Pulse Media', content: "The editing is aggressive, clean, and impossible to scroll past.", size: 'small' },
+const reviews = [
+  { id: 1, name: 'Sarah Chen', role: 'CMO', company: 'Aether Intel', quote: "Graphikardia decoded our entire market position. Growth was immediate and sustained.", stat: "+140% ROI" },
+  { id: 2, name: 'Marcus Thorne', role: 'Founder', company: 'Pulse Media', quote: "The editing is aggressive, clean, and impossible to scroll past. Elite-tier performance.", stat: "2.4M Views" },
+  { id: 3, name: 'Elena Rossi', role: 'Brand Lead', company: 'Vanguard', quote: "They don't just build sites; they build digital empires.", stat: "5.2x Leads" }
 ];
 
-function TestimonialCard({ item }: { item: typeof testimonials[0] }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
-
+export default function TestimonialsPage({ isDark }: { isDark: boolean }) {
   return (
-    <motion.div 
-      onMouseEnter={() => videoRef.current?.play()}
-      onMouseLeave={() => { videoRef.current?.pause(); setIsMuted(true); }}
-      className={`relative bg-zinc-900 border border-white/5 p-8 rounded-[32px] overflow-hidden min-h-[300px] flex flex-col justify-between group
-      ${item.size === 'large' ? 'md:col-span-2' : ''}`}
-    >
-      {item.videoSrc && (
-        <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-50 transition-opacity">
-          <video ref={videoRef} src={item.videoSrc} muted={isMuted} loop playsInline className="w-full h-full object-cover grayscale group-hover:grayscale-0" />
-        </div>
-      )}
-      <div className="relative z-10">
-        <Quote className="text-zinc-700 mb-4" />
-        <p className="text-2xl font-medium leading-tight">{item.content}</p>
-      </div>
-      <div className="relative z-10 flex items-end justify-between">
-        <div>
-          <h4 className="text-2xl lowercase font-cursive" style={{ fontFamily: '"Playwrite NZ", cursive' }}>{item.name}</h4>
-          <p className="font-mono text-[10px] uppercase text-zinc-500">{item.company} / {item.role}</p>
-        </div>
-        {item.videoSrc && (
-          <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} className="p-3 bg-white/10 rounded-full">
-            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} className="text-green-400" />}
-          </button>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-export default function TestimonialsPage() {
-  return (
-    <main className="bg-black text-white min-h-screen pt-32 pb-20 px-6">
-      <div className="max-w-7xl mx-auto">
-        <Link to="/" className="text-zinc-500 hover:text-white transition-all flex items-center gap-2 font-mono text-xs uppercase mb-12">
-          <ArrowLeft size={14} /> Back to Hub
+    <section className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+      <div className="mb-20">
+        <Link to="/" className="text-xs font-mono uppercase tracking-widest opacity-50 hover:opacity-100 flex items-center gap-2 mb-8">
+          <ArrowUpRight className="rotate-180" size={14} /> Back to Hub
         </Link>
-        <h1 className="text-8xl md:text-[10rem] font-black uppercase tracking-tighter leading-[0.8] mb-20">
-          The<br />Echo.
+        <h1 className="text-[12vw] leading-[0.8] font-black uppercase tracking-tighter italic">
+          The Echo<span className="text-purple-500">.</span>
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map(t => <TestimonialCard key={t.id} item={t} />)}
-        </div>
       </div>
-    </main>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {reviews.map((r, i) => (
+          <motion.div 
+            key={r.id}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className={`p-10 rounded-2xl border flex flex-col justify-between min-h-[400px] group transition-all duration-500 hover:-translate-y-2
+              ${isDark ? 'bg-zinc-900/50 border-white/10 hover:bg-zinc-900' : 'bg-zinc-50 border-black/5 hover:bg-white hover:shadow-xl'}
+            `}
+          >
+            <div>
+              <Quote className="mb-6 opacity-30 w-12 h-12" />
+              <p className="text-2xl font-bold leading-tight mb-8">"{r.quote}"</p>
+            </div>
+            
+            <div className="flex justify-between items-end">
+              <div>
+                <h4 className="font-cursive text-2xl mb-1" style={{ fontFamily: '"Playwrite NZ", cursive' }}>{r.name}</h4>
+                <p className="text-[10px] font-mono uppercase tracking-widest opacity-60">{r.company} / {r.role}</p>
+              </div>
+              <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${isDark ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                {r.stat}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
   );
 }
