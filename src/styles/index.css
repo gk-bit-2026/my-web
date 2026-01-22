@@ -5,49 +5,36 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --cursor-color: white;
+@layer base {
+  :root {
+    --cursor-color: white;
+    /* FIXED: Mapping the variables your tailwind.config.ts expects */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-interface: 'Inter', monospace;
+    --font-accent: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    @apply bg-[#050505] text-white;
+    font-family: var(--font-body);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
 }
 
 html {
-  scroll-behavior: smooth;
-  cursor: none; /* ⚠️ CRITICAL: This hides the mouse. Ensure CustomCursor.tsx is working! */
+  scroll-behavior: smooth;
+  cursor: none; 
 }
 
-body {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden; /* Prevents horizontal scroll on mobile animations */
-}
-
-/* Custom Selection Color (Inverted Style) */
+/* Custom Selection Color */
 ::selection {
-  background: #ffffff;
-  color: #000000;
+  background: #ffffff;
+  color: #000000;
 }
 
-/* Global Scrollbar Engineering */
-::-webkit-scrollbar {
-  width: 4px; /* Slightly thinner for a sleeker look */
-}
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Utility for hiding scrollbar but keeping functionality (optional use) */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* Scrollbar Styles ... (Keep your existing scrollbar CSS here) */
