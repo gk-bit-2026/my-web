@@ -11,6 +11,7 @@ import { ProductVault } from './components/ProductVault';
 import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { FooterCTA } from './components/FooterCTA';
 import { ImpactSidebar } from './components/ImpactSidebar';
+import { CustomCursor } from './components/CustomCursor'; // Restored
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
 
@@ -54,11 +55,17 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
+      
+      {/* ⚡️ The Custom Cursor must stay here because of 'cursor: none' in CSS */}
+      <CustomCursor /> 
+
       <AnimatePresence mode="wait">
         {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <div className={`min-h-screen transition-colors duration-700 ease-in-out ${isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'}`}>
+      <div className={`min-h-screen transition-colors duration-700 ease-in-out ${
+        isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'
+      }`}>
         
         <Navigation 
           isDark={isDark} 
