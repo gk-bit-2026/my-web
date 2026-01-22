@@ -1,73 +1,97 @@
-'use client';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+// Components
+import { Navigation } from './components/Navigation';
+import { LoadingScreen } from './components/LoadingScreen';
+import { HeroSection } from './components/HeroSection';
+import { KardiaMethodology } from './components/KardiaMethodology';
+import { ProductVault } from './components/ProductVault';
+import { BeforeAfterSlider } from './components/BeforeAfterSlider';
+import { FooterCTA } from './components/FooterCTA';
+import { ImpactSidebar } from './components/ImpactSidebar';
+import WorkPage from './WorkPage';
+import TestimonialsPage from './TestimonialsPage';
 
-import { LoadingScreen } from './components/LoadingScreen.tsx';
-import { Navigation } from './components/Navigation.tsx';
-import { HeroSection } from './components/HeroSection.tsx';
-import { KardiaMethodology } from './components/KardiaMethodology.tsx';
-import { ProductVault } from './components/ProductVault.tsx';
-import { BeforeAfterSlider } from './components/BeforeAfterSlider.tsx';
-import { FooterCTA } from './components/FooterCTA.tsx';
-import { ImpactSidebar } from './components/ImpactSidebar.tsx';
-import WorkPage from './WorkPage.tsx';
-import TestimonialsPage from './TestimonialsPage.tsx';
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isDark, setIsDark] = useState(true); // Default Dark Mode
+  const [language, setLanguage] = useState('English (Global)');
+  const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
-  const [showWhiteFlash, setShowWhiteFlash] = useState(false);
-  
-  // GLOBAL STATES
-  const [isDark, setIsDark] = useState(true); // Default to Dark
-  const [region, setRegion] = useState<'IN' | 'INTL'>('IN');
 
-  const handleAddToStrategy = (product: any) => {
-    if (!selectedProducts.find(p => p.id === product.id)) {
-      setSelectedProducts([...selectedProducts, product]);
-      setIsSidebarOpen(true);
+  // Theme Toggler Effect
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.backgroundColor = '#050505';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.backgroundColor = '#ffffff';
     }
+  }, [isDark]);
+
+  const addToStrategy = (item: any) => {
+    if (!cart.find((i) => i.id === item.id)) {
+      setCart([...cart, item]);
+    }
+    setIsSidebarOpen(true);
+  };
+
+  const removeFromStrategy = (id: number) => {
+    setCart(cart.filter((i) => i.id !== id));
   };
 
   return (
     <Router>
+      <ScrollToTop />
       <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
+        {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <div className={`relative min-h-screen overflow-x-hidden transition-colors duration-500 ${isDark ? 'bg-zinc-950 text-white' : 'bg-white text-black'}`}>
+      <div className={`min-h-screen transition-colors duration-700 ease-in-out ${isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'}`}>
         
-        {/* Pass states to Navigation */}
         <Navigation 
           isDark={isDark} 
           setIsDark={setIsDark} 
-          region={region} 
-          setRegion={setRegion} 
+          language={language}
+          setLanguage={setLanguage}
+          cartCount={cart.length}
+          openSidebar={() => setIsSidebarOpen(true)}
         />
 
-        <Routes>
-          <Route path="/" element={
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <HeroSection isDark={isDark} region={region} />
-              <KardiaMethodology onPhaseHover={(p) => p === 3 && setShowWhiteFlash(true)} />
-              <ProductVault onAddToStrategy={handleAddToStrategy} />
-              <BeforeAfterSlider />
-              <FooterCTA />
-            </motion.div>
-          } />
-          <Route path="/work" element={<WorkPage />} />
-          <Route path="/testimonials" element={<TestimonialsPage />} />
-        </Routes>
+        <main className="relative z-10">
+          <Routes>
+            <Route path="/" element={
+              <>
+                <HeroSection isDark={isDark} />
+                <KardiaMethodology isDark={isDark} />
+                <ProductVault onAdd={addToStrategy} selectedIds={cart.map(i => i.id)} />
+                <BeforeAfterSlider isDark={isDark} />
+                <FooterCTA isDark={isDark} />
+              </>
+            } />
+            <Route path="/work" element={<WorkPage isDark={isDark} />} />
+            <Route path="/testimonials" element={<TestimonialsPage isDark={isDark} />} />
+          </Routes>
+        </main>
 
-        <ImpactSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          selectedProducts={selectedProducts}
-          onRemoveProduct={(id) => setSelectedProducts(selectedProducts.filter(p => p.id !== id))}
+        <ImpactSidebar 
+          isOpen={isSidebarOpen} 
+          onClose={() => setIsSidebarOpen(false)} 
+          items={cart} 
+          onRemove={removeFromStrategy}
         />
+        
       </div>
     </Router>
   );
