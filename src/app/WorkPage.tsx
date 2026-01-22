@@ -1,72 +1,58 @@
-'use client';
-
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Play, ArrowRight, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const workItems = [
-  { id: 1, type: 'reels', title: 'Luxury Car Promo', src: '/videos/reel1.mp4', isVideo: true, size: 'tall', desc: 'Aggressive pacing meets high-end automotive aesthetics.' },
-  { id: 2, type: 'posts', title: 'Brand Identity', src: '/images/post1.jpg', isVideo: false, size: 'square', desc: 'Minimalist brand system for a fintech disruptor.' },
-  { id: 3, type: 'graphs', title: 'Data Viz', src: '/images/graph1.jpg', isVideo: false, size: 'wide', desc: 'Complex market metrics simplified into brutalist visual assets.' },
+const works = [
+  { id: 1, title: 'Luxury Automotive', cat: 'Reels / Production', size: 'lg', img: '/work1.jpg' },
+  { id: 2, title: 'Fintech Identity', cat: 'Branding / UI', size: 'sm', img: '/work2.jpg' },
+  { id: 3, title: 'SaaS Data Viz', cat: 'Development', size: 'sm', img: '/work3.jpg' },
+  { id: 4, title: 'Viral Campaign', cat: 'Strategy', size: 'md', img: '/work4.jpg' }
 ];
 
-export default function WorkPage() {
-  const [selectedItem, setSelectedItem] = useState<typeof workItems[0] | null>(null);
-
+export default function WorkPage({ isDark }: { isDark: boolean }) {
   return (
-    <main className="pt-32 pb-20 px-6 bg-black text-white min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-20">
-          <Link to="/" className="text-zinc-500 hover:text-white transition-all flex items-center gap-2 font-mono text-xs uppercase mb-8">
-            <ArrowLeft size={14} /> Back to Hub
-          </Link>
-          <h1 className="text-8xl md:text-[12rem] font-black uppercase tracking-tighter leading-[0.75]">
-            Works<span className="text-zinc-800">.</span>
+    <div className="pt-32 pb-20 px-6 max-w-[1800px] mx-auto">
+      <header className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div>
+          <h1 className="text-[12vw] leading-[0.8] font-black uppercase tracking-tighter">
+            Sel_Work<span className="text-purple-600">.</span>
           </h1>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[300px]">
-          {workItems.map((item) => (
-            <motion.div 
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              className={`relative rounded-[32px] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer group
-                ${item.size === 'tall' ? 'row-span-2' : ''} ${item.size === 'wide' ? 'col-span-2' : ''}`}
-            >
-              <img src={item.src} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" alt={item.title} />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-8 flex flex-col justify-end">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">{item.type}</p>
-                <h3 className="text-2xl font-black uppercase tracking-tighter">{item.title}</h3>
-              </div>
-            </motion.div>
-          ))}
         </div>
-      </div>
+        <p className="font-mono text-xs uppercase tracking-[0.4em] opacity-60 max-w-xs text-right hidden md:block">
+          Curated digital assets designed for maximum market penetration.
+        </p>
+      </header>
 
-      {/* OVERLAY MODAL */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setSelectedItem(null)} />
-            <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative w-full max-w-6xl bg-zinc-900 rounded-[40px] overflow-hidden flex flex-col lg:flex-row h-full max-h-[85vh]">
-              <button onClick={() => setSelectedItem(null)} className="absolute top-6 right-6 z-50 p-3 bg-white text-black rounded-full"><X size={20} /></button>
-              <div className="lg:w-2/3 bg-black">
-                {selectedItem.isVideo ? <video src={selectedItem.src} autoPlay muted loop className="w-full h-full object-cover" /> : <img src={selectedItem.src} className="w-full h-full object-cover" />}
-              </div>
-              <div className="lg:w-1/3 p-12 flex flex-col justify-between">
-                <div>
-                  <h2 className="text-4xl font-black uppercase tracking-tighter mb-4">{selectedItem.title}</h2>
-                  <p className="text-zinc-400 leading-relaxed">{selectedItem.desc}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[400px]">
+        {works.map((item, i) => (
+          <motion.div 
+            key={item.id}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className={`relative group overflow-hidden rounded-xl bg-zinc-800
+              ${item.size === 'lg' ? 'md:col-span-2 md:row-span-2' : ''}
+              ${item.size === 'md' ? 'md:col-span-2' : ''}
+            `}
+          >
+            {/* Placeholder for Image - Replace src with actual assets */}
+            <div className={`w-full h-full bg-gradient-to-br transition-all duration-700 group-hover:scale-105
+              ${i % 2 === 0 ? 'from-purple-900 to-black' : 'from-blue-900 to-black'}
+            `} />
+            
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+            
+            <div className="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-black/90 to-transparent">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-white/60 mb-2 block">{item.cat}</span>
+              <div className="flex justify-between items-center">
+                <h3 className="text-3xl font-bold uppercase text-white italic tracking-tighter">{item.title}</h3>
+                <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowUpRight size={18} />
                 </div>
-                <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest flex items-center justify-center gap-3">
-                  Start Project <ArrowRight size={18} />
-                </button>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </main>
+        ))}
+      </div>
+    </div>
   );
 }
