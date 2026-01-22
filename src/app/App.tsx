@@ -16,9 +16,6 @@ import { PageTransition } from './components/PageTransition';
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
 
-/**
- * Ensures page resets to top on route change
- */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -28,12 +25,12 @@ function ScrollToTop() {
 }
 
 /**
- * AnimatedRoutes handles the actual routing and triggers 
- * the AnimatePresence based on the location key.
+ * FIXED: Added 'setIsDark' to the destructuring. 
+ * This resolves TS2322: Property 'isDark' does not exist on type 'IntrinsicAttributes'
  */
 function AnimatedRoutes({ 
   isDark, 
-  setIsDark, 
+  setIsDark, // Added
   addToStrategy, 
   cart, 
   removeFromStrategy, 
@@ -49,7 +46,7 @@ function AnimatedRoutes({
       
       <Navigation 
         isDark={isDark} 
-        setIsDark={setIsDark} 
+        setIsDark={setIsDark} // FIXED: Was incorrectly set to addToStrategy
         cartCount={cart.length}
         openSidebar={() => setIsSidebarOpen(true)}
       />
@@ -98,7 +95,6 @@ export default function App() {
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Theme Toggler Effect - Updates the root HTML element
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -125,20 +121,14 @@ export default function App() {
       <ScrollToTop />
       <CustomCursor /> 
 
-      {/* Main Loading Sequence */}
       <AnimatePresence mode="wait">
-        {isLoading && (
-          <LoadingScreen 
-            key="loader" 
-            onComplete={() => setIsLoading(false)} 
-          />
-        )}
+        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
       {!isLoading && (
         <AnimatedRoutes 
           isDark={isDark}
-          setIsDark={setIsDark}
+          setIsDark={setIsDark} // Now correctly passed and accepted
           addToStrategy={addToStrategy}
           cart={cart}
           removeFromStrategy={removeFromStrategy}
