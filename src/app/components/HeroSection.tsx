@@ -68,12 +68,13 @@ export function HeroSection() {
   }, [mousePos, activeRoleIndex]);
 
   useEffect(() => {
+    let animationFrameId: number;
     const animate = () => {
       drawCanvas();
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
-    const id = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(id);
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [drawCanvas]);
 
   useEffect(() => {
@@ -138,4 +139,34 @@ export function HeroSection() {
             <motion.div
               key={activeRoleIndex}
               initial={{ opacity: 0, y: 40, rotateX: -90, filter: "blur(10px)" }}
-              animate={{
+              animate={{ opacity: 1, y: 0, rotateX: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -40, rotateX: 90, filter: "blur(10px)" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute text-3xl md:text-6xl font-black uppercase tracking-tight text-zinc-400"
+              style={{ fontFamily: '"Space Grotesk", sans-serif' }}
+            >
+              {roles[activeRoleIndex]}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="mt-8">
+          <p className="text-xl md:text-2xl font-serif italic text-zinc-600">
+            "Your <span className="text-black font-bold">LEGACY</span>, <br />
+            Our <span className="text-black font-bold">CRAFT</span>."
+          </p>
+        </motion.div>
+      </motion.div>
+
+      {/* 4. Scroll Indicator */}
+      <motion.div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1px] bg-gradient-to-b from-transparent via-zinc-300 to-black h-20 z-20" />
+
+      {/* 5. Footer Info */}
+      <div className="absolute bottom-10 right-10 z-20 hidden lg:block">
+        <p className="text-[9px] font-mono tracking-[0.3em] uppercase text-zinc-400 transform rotate-90 origin-right">
+          Interactive_Canvas_Active
+        </p>
+      </div>
+    </div>
+  );
+}
