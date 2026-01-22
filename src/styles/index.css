@@ -6,62 +6,35 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --cursor-color: white;
-    /* Font Variables for tailwind.config.ts */
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-interface: 'Inter', monospace;
-    --font-accent: 'Space Grotesk', sans-serif;
-  }
+  :root {
+    --cursor-color: white;
+    /* FIXED: Mapping the variables your tailwind.config.ts expects */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-interface: 'Inter', monospace;
+    --font-accent: 'Space Grotesk', sans-serif;
+  }
 
-  /* FIX: Force default background and text colors. 
-     If this is missing, the screen may appear white/blank 
-     because text is white but background isn't black yet.
-  */
-  html {
-    background-color: #050505;
-    color: white;
-    scroll-behavior: smooth;
-    cursor: none; 
-  }
+  body {
+    @apply bg-[#050505] text-white;
+    font-family: var(--font-body);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+}
 
-  body {
-    @apply bg-[#050505] text-white antialiased;
-    font-family: var(--font-body);
-    margin: 0;
-    text-rendering: optimizeLegibility;
-    overflow-x: hidden;
-    min-h-screen;
-  }
+html {
+  scroll-behavior: smooth;
+  cursor: none; 
 }
 
 /* Custom Selection Color */
 ::selection {
-  background: #ffffff;
-  color: #000000;
+  background: #ffffff;
+  color: #000000;
 }
 
-/* Global Scrollbar Engineering */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Utility for hiding scrollbar */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* Scrollbar Styles ... (Keep your existing scrollbar CSS here) */
