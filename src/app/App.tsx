@@ -18,43 +18,63 @@ import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
 import AdminPortal from './AdminPortal';
 
+/**
+ * Ensures page starts at top on route change
+ */
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => { 
+    window.scrollTo(0, 0); 
+  }, [pathname]);
   return null;
 }
 
-// 2. SECRET SHORTCUT HOOK (Type 'gk' to open portal)
+/**
+ * 2. SECRET SHORTCUT HOOK (Type 'gk' to open portal)
+ */
 function useSecretShortcut() {
   const navigate = useNavigate();
   useEffect(() => {
     let keys = '';
     const handleKeyDown = (e: KeyboardEvent) => {
+      // We check for 'gk' at the end of the string
       keys += e.key.toLowerCase();
-      if (keys.endsWith('gk')) { 
+      if (keys.endsWith('silent')) { 
         navigate('/terminal-x');
-        keys = '';
+        keys = ''; // Reset after success
       }
-      if (keys.length > 8) keys = '';
+      // Keep memory light
+      if (keys.length > 10) keys = keys.slice(-5);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate]);
 }
 
+/**
+ * Handles main UI rendering and route transitions
+ */
 function AnimatedRoutes({ 
   isDark, setIsDark, addToStrategy, cart, removeFromStrategy, isSidebarOpen, setIsSidebarOpen 
 }: any) {
   const location = useLocation();
-  useSecretShortcut();
+  useSecretShortcut(); // Listen for the secret command 'gk'
 
   const isTerminal = location.pathname.includes('terminal-x');
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'}`}>
-      {/* Hide UI on Terminal Mode */}
+    <div className={`min-h-screen transition-colors duration-700 ease-in-out ${
+      isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'
+    }`}>
+      
+      {/* Hide standard UI when inside the Secret Admin Portal */}
       {!isTerminal && (
-        <Navigation isDark={isDark} setIsDark={setIsDark} cartCount={cart.length} openSidebar={() => setIsSidebarOpen(true)} />
+        <Navigation 
+          isDark={isDark} 
+          setIsDark={setIsDark} 
+          cartCount={cart.length} 
+          openSidebar={() => setIsSidebarOpen(true)} 
+        />
       )}
 
       <main className="relative z-10">
@@ -64,47 +84,89 @@ function AnimatedRoutes({
               <PageTransition>
                 <HeroSection {...({ isDark } as any)} />
                 <KardiaMethodology {...({ isDark } as any)} />
-                <ProductVault onAdd={addToStrategy} selectedIds={cart.map((i: any) => i.id)} />
+                <ProductVault 
+                  onAdd={addToStrategy} 
+                  selectedIds={cart.map((i: any) => i.id)} 
+                />
                 <BeforeAfterSlider {...({ isDark } as any)} />
                 <FooterCTA {...({ isDark } as any)} />
               </PageTransition>
             } />
-            <Route path="/work" element={<PageTransition><WorkPage {...({ isDark } as any)} /></PageTransition>} />
-            <Route path="/testimonials" element={<PageTransition><TestimonialsPage {...({ isDark } as any)} /></PageTransition>} />
+            
+            <Route path="/work" element={
+              <PageTransition>
+                <WorkPage {...({ isDark } as any)} />
+              </PageTransition>
+            } />
+            
+            <Route path="/testimonials" element={
+              <PageTransition>
+                <TestimonialsPage {...({ isDark } as any)} />
+              </PageTransition>
+            } />
+            
             <Route path="/terminal-x" element={<AdminPortal />} />
           </Routes>
         </AnimatePresence>
       </main>
 
       {!isTerminal && (
-        <ImpactSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} items={cart} onRemove={removeFromStrategy} />
+        <ImpactSidebar 
+          isOpen={isSidebarOpen} 
+          onClose={() => setIsSidebarOpen(false)} 
+          items={cart} 
+          onRemove={removeFromStrategy} 
+        />
       )}
     </div>
   );
 }
 
+/**
+ * Root App Component
+ */
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDark, setIsDark] = useState(true);
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Sync background color with theme state
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = isDark ? '#050505' : '#ffffff';
+  }, [isDark]);
+
   return (
     <Router>
       <ScrollToTop />
       <CustomCursor /> 
-      <Analytics /> {/* 3. ACTIVATE VERCEL ANALYTICS */}
+      
+      {/* 3. ACTIVATE VERCEL ANALYTICS - Placed globally within the Router */}
+      <Analytics /> 
 
       <AnimatePresence mode="wait">
-        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
+        {isLoading && (
+          <LoadingScreen 
+            key="loader" 
+            onComplete={() => setIsLoading(false)} 
+          />
+        )}
       </AnimatePresence>
 
       {!isLoading && (
         <AnimatedRoutes 
-          isDark={isDark} setIsDark={setIsDark}
-          addToStrategy={(i: any) => {setCart([...cart, i]); setIsSidebarOpen(true);}}
-          cart={cart} removeFromStrategy={(id: any) => setCart(cart.filter(c => c.id !== id))}
-          isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+          isDark={isDark} 
+          setIsDark={setIsDark}
+          addToStrategy={(i: any) => {
+            if (!cart.find(item => item.id === i.id)) {
+                setCart([...cart, i]);
+            }
+            setIsSidebarOpen(true);
+          }}
+          cart={cart} 
+          removeFromStrategy={(id: any) => setCart(cart.filter(c => c.id !== id))}
+          isSidebarOpen={isSidebarOpen} 
+          setIsSidebarOpen={setIsSidebarOpen}
         />
       )}
     </Router>
