@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/react";
 
 // Components
 import { Navigation } from './components/Navigation';
-import { LoadingScreen } from './components/LoadingScreen';
 import { HeroSection } from './components/HeroSection';
 import { KardiaMethodology } from './components/KardiaMethodology';
 import { ProductVault } from './components/ProductVault';
@@ -20,42 +19,20 @@ import AdminPortal from './AdminPortal';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { 
-    window.scrollTo(0, 0); 
-  }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
-}
-
-function useSecretShortcut() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    let keys = '';
-    const handleKeyDown = (e: KeyboardEvent) => {
-      keys += e.key.toLowerCase();
-      if (keys.endsWith('silent')) { 
-        navigate('/terminal-x');
-        keys = ''; 
-      }
-      if (keys.length > 10) keys = keys.slice(-6);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate]);
 }
 
 function AnimatedRoutes({ 
   isDark, setIsDark, addToStrategy, cart, removeFromStrategy, isSidebarOpen, setIsSidebarOpen 
 }: any) {
   const location = useLocation();
-  useSecretShortcut();
-
   const isTerminal = location.pathname.includes('terminal-x');
 
   return (
     <div className={`min-h-screen transition-colors duration-700 ease-in-out ${
       isDark ? 'bg-[#050505] text-white' : 'bg-white text-zinc-900'
     }`}>
-      
       {!isTerminal && (
         <Navigation 
           isDark={isDark} 
@@ -80,19 +57,8 @@ function AnimatedRoutes({
                 <FooterCTA isDark={isDark} />
               </PageTransition>
             } />
-            
-            <Route path="/work" element={
-              <PageTransition>
-                <WorkPage isDark={isDark} />
-              </PageTransition>
-            } />
-            
-            <Route path="/testimonials" element={
-              <PageTransition>
-                <TestimonialsPage isDark={isDark} />
-              </PageTransition>
-            } />
-            
+            <Route path="/work" element={<PageTransition><WorkPage isDark={isDark} /></PageTransition>} />
+            <Route path="/testimonials" element={<PageTransition><TestimonialsPage isDark={isDark} /></PageTransition>} />
             <Route path="/terminal-x" element={<AdminPortal />} />
           </Routes>
         </AnimatePresence>
@@ -111,14 +77,28 @@ function AnimatedRoutes({
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDark, setIsDark] = useState(false); // DEFAULT TO LIGHT MODE
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    document.documentElement.style.backgroundColor = isDark ? '#050505' : '#ffffff';
-    // Update data-theme or class for Tailwind if needed
+    const themeColor = isDark ? '#050505' : '#ffffff';
+    document.documentElement.style.backgroundColor = themeColor;
+    
+    // Mobile Status Bar Color
+    let metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (!metaTheme) {
+      metaTheme = document.createElement('meta');
+      metaTheme.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaTheme);
+    }
+    metaTheme.setAttribute('content', themeColor);
+
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
@@ -131,32 +111,16 @@ export default function App() {
       <ScrollToTop />
       <CustomCursor /> 
       <Analytics /> 
-
-      <AnimatePresence mode="wait">
-        {isLoading && (
-          <LoadingScreen 
-            key="loader" 
-            onComplete={() => setIsLoading(false)} 
-          />
-        )}
-      </AnimatePresence>
-
-      {!isLoading && (
-        <AnimatedRoutes 
-          isDark={isDark} 
-          setIsDark={setIsDark}
-          addToStrategy={(i: any) => {
-            if (!cart.find(item => item.id === i.id)) {
-                setCart([...cart, i]);
-            }
-            setIsSidebarOpen(true);
-          }}
-          cart={cart} 
-          removeFromStrategy={(id: any) => setCart(cart.filter(c => c.id !== id))}
-          isSidebarOpen={isSidebarOpen} 
-          setIsSidebarOpen={setIsSidebarOpen}
-        />
-      )}
+      <AnimatedRoutes 
+        isDark={isDark} setIsDark={setIsDark}
+        cart={cart} setCart={setCart}
+        isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        addToStrategy={(i: any) => {
+          if (!cart.find(item => item.id === i.id)) setCart([...cart, i]);
+          setIsSidebarOpen(true);
+        }}
+        removeFromStrategy={(id: any) => setCart(cart.filter(c => c.id !== id))}
+      />
     </Router>
   );
 }
