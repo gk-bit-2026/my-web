@@ -1,18 +1,17 @@
-// src/app/App.tsx
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
-// Components
-import { Navigation } from '@/components/Navigation'; // You likely need to create/update this too
+// Components - Pointing to @/ (which is src/app/)
+import { Navigation } from '@/components/Navigation';
 import { HeroSection } from '@/components/HeroSection';
 import { KardiaMethodology } from '@/components/KardiaMethodology';
 import { ProductVault } from '@/components/ProductVault';
 import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
 import { FooterCTA } from '@/components/FooterCTA';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { ImpactSidebar } from '@/components/ImpactSidebar'; // Assuming you have this or need it
-import { cn } from '@/lib/utils';
+import { ImpactSidebar } from '@/components/ImpactSidebar';
+import { cn } from '@/lib/utils'; // This assumes lib is also inside src/app/
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -20,8 +19,25 @@ function ScrollToTop() {
   return null;
 }
 
-function MainLayout({ isDark, setIsDark, cart, setCart, isSidebarOpen, setIsSidebarOpen }: any) {
-  // Add to cart handler
+// 1. Defining the Layout Interface to clear TS2322 errors
+interface MainLayoutProps {
+  isDark: boolean;
+  setIsDark: (val: boolean) => void;
+  cart: any[];
+  setCart: (val: any[]) => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (val: boolean) => void;
+}
+
+function MainLayout({ 
+  isDark, 
+  setIsDark, 
+  cart, 
+  setCart, 
+  isSidebarOpen, 
+  setIsSidebarOpen 
+}: MainLayoutProps) {
+  
   const addToStrategy = (item: any) => {
     if (!cart.find((i: any) => i.id === item.id)) {
       setCart([...cart, item]);
@@ -38,10 +54,15 @@ function MainLayout({ isDark, setIsDark, cart, setCart, isSidebarOpen, setIsSide
       "min-h-screen transition-colors duration-700 ease-in-out",
       isDark ? "bg-[#050505] text-white" : "bg-white text-zinc-900"
     )}>
-      {/* Navigation would go here, passing isDark */}
-      {/* <Navigation isDark={isDark} setIsDark={setIsDark} cartCount={cart.length} ... /> */}
+      <Navigation 
+        isDark={isDark} 
+        setIsDark={setIsDark} 
+        cartCount={cart.length} 
+        onOpenSidebar={() => setIsSidebarOpen(true)} 
+      />
 
       <main>
+        {/* These components MUST have isDark in their props definition */}
         <HeroSection isDark={isDark} />
         <KardiaMethodology isDark={isDark} />
         <ProductVault 
@@ -53,8 +74,13 @@ function MainLayout({ isDark, setIsDark, cart, setCart, isSidebarOpen, setIsSide
         <FooterCTA isDark={isDark} />
       </main>
 
-      {/* Sidebar would go here */}
-      {/* <ImpactSidebar isOpen={isSidebarOpen} items={cart} onRemove={removeFromStrategy} ... /> */}
+      <ImpactSidebar 
+        isOpen={isSidebarOpen} 
+        items={cart} 
+        onRemove={removeFromStrategy} 
+        onClose={() => setIsSidebarOpen(false)}
+        isDark={isDark}
+      />
     </div>
   );
 }
@@ -62,18 +88,13 @@ function MainLayout({ isDark, setIsDark, cart, setCart, isSidebarOpen, setIsSide
 export default function App() {
   const [loading, setLoading] = useState(true);
   
-  // 1. System Preference Detection
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return true; // Default to dark if unknown
-  });
+  // 2. FORCED LIGHT MODE: Defaulting to false instead of system detection
+  const [isDark, setIsDark] = useState(false);
 
   const [cart, setCart] = useState<any[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // 2. Handle Body Background Color Change
+  // 3. Body style sync
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -102,7 +123,6 @@ export default function App() {
                 setIsSidebarOpen={setIsSidebarOpen}
               />
             } />
-            {/* Add other routes like /work or /terminal-x here */}
           </Routes>
         )}
       </AnimatePresence>
