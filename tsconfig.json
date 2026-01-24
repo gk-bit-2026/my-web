@@ -21,8 +21,10 @@
 
     /* Path Aliases */
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/app/*"]
+  "paths": {
+  "@/*": ["./src/app/*"],
+  "@/lib/*": ["./src/lib/*"]
+}
     }
   },
   "include": ["src"],
