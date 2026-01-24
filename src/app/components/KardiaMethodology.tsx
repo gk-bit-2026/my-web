@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const steps = [
   { id: '01', title: 'Deconstruction', desc: 'We strip your brand to its core logic, identifying every friction point holding back your revenue.' },
@@ -8,7 +9,10 @@ const steps = [
 
 export function KardiaMethodology({ isDark }: { isDark: boolean }) {
   return (
-    <section className="py-32 px-6 border-t border-current/10">
+    <section className={cn(
+      "py-32 px-6 border-t transition-colors duration-500",
+      isDark ? "border-white/10" : "border-black/5"
+    )}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-20 opacity-50">The Methodology</h2>
         
@@ -22,7 +26,11 @@ export function KardiaMethodology({ isDark }: { isDark: boolean }) {
               transition={{ delay: i * 0.2 }}
               className="group"
             >
-              <div className="text-[5rem] font-black leading-none opacity-10 group-hover:opacity-100 group-hover:text-purple-600 transition-all duration-500 mb-6">
+              <div className={cn(
+                "text-[5rem] font-black leading-none transition-all duration-500 mb-6",
+                isDark ? "opacity-10 text-white" : "opacity-10 text-black",
+                "group-hover:opacity-100 group-hover:text-purple-600"
+              )}>
                 {step.id}
               </div>
               <h3 className="text-3xl font-bold uppercase italic tracking-tighter mb-4">{step.title}</h3>
