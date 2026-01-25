@@ -1,12 +1,12 @@
+'use client';
+
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
+import { useTheme } from '@/lib/ThemeContext';
 import { cn } from '@/lib/utils';
 
-interface HeroProps {
-  isDark: boolean;
-}
-
-export function HeroSection({ isDark }: HeroProps) {
+export function HeroSection() {
+  const { isDark } = useTheme();
   const containerRef = useRef(null);
   const { scrollY } = useScroll();
   const [displayTitle] = useState("Graphikardia");
@@ -16,7 +16,6 @@ export function HeroSection({ isDark }: HeroProps) {
 
   return (
     <section ref={containerRef} className="relative h-screen flex items-center justify-center overflow-hidden px-4">
-      {/* Background Noise */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
@@ -49,9 +48,7 @@ export function HeroSection({ isDark }: HeroProps) {
         </div>
 
         <div className="relative group">
-          <motion.h1 
-            className="text-[14vw] md:text-[9vw] font-black uppercase italic leading-none tracking-tighter break-words px-4"
-          >
+          <motion.h1 className="text-[14vw] md:text-[9vw] font-black uppercase italic leading-none tracking-tighter break-words px-4">
             {displayTitle}
             <motion.div 
               animate={{ left: ['-10%', '110%'] }} 
