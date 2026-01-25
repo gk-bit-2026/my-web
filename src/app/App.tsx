@@ -1,18 +1,11 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
-// Pages
-import WorkPage from './WorkPage'; // Ensure these match your filenames exactly
+// Pages & Components
+import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
-
-// Context & Utils
-import { ThemeProvider, useTheme } from '../lib/ThemeContext'; 
-import { cn } from '../lib/utils';
-
-// Components
 import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
 import { KardiaMethodology } from './components/KardiaMethodology';
@@ -21,6 +14,26 @@ import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { FooterCTA } from './components/FooterCTA';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ImpactSidebar } from './components/ImpactSidebar';
+import { CustomCursor } from './components/CustomCursor';
+
+// Context
+import { ThemeProvider, useTheme } from '../lib/ThemeContext'; 
+import { cn } from '../lib/utils';
+
+// CRITICAL: This component syncs isDark to the HTML class for CSS variables to work
+function ThemeGate({ children }: { children: React.ReactNode }) {
+  const { isDark } = useTheme();
+  
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+    }
+  }, [isDark]);
+
+  return <div className={cn(isDark ? "dark" : "light")}>{children}</div>;
+}
 
 function MainLayout({ children }: { children?: React.ReactNode }) {
   const { isDark } = useTheme();
@@ -35,11 +48,7 @@ function MainLayout({ children }: { children?: React.ReactNode }) {
   };
 
   return (
-    <div className={cn(
-      "min-h-screen transition-colors duration-700",
-      isDark ? "bg-[#050505] text-white" : "bg-white text-zinc-900"
-    )}>
-      {/* FIX: Changed onOpenSidebar to openSidebar to match your Navigation.tsx */}
+    <div className="min-h-screen">
       <Navigation cartCount={cart.length} openSidebar={() => setIsSidebarOpen(true)} />
       
       <main>
@@ -70,28 +79,22 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <LoadingScreen key="loader" onComplete={() => setLoading(false)} />
-          ) : (
-            <Routes>
-              {/* HOME */}
-              <Route path="/" element={<MainLayout />} />
-              
-              {/* WORK */}
-              <Route path="/work" element={
-                <MainLayout><WorkPage /></MainLayout>
-              } />
-              
-              {/* TESTIMONIALS */}
-              <Route path="/testimonials" element={
-                <MainLayout><TestimonialsPage /></MainLayout>
-              } />
-            </Routes>
-          )}
-        </AnimatePresence>
-      </Router>
+      <ThemeGate>
+        <CustomCursor /> {/* CURSOR INJECTED GLOBALLY */}
+        <Router>
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <LoadingScreen key="loader" onComplete={() => setLoading(false)} />
+            ) : (
+              <Routes>
+                <Route path="/" element={<MainLayout />} />
+                <Route path="/work" element={<MainLayout><WorkPage /></MainLayout>} />
+                <Route path="/testimonials" element={<MainLayout><TestimonialsPage /></MainLayout>} />
+              </Routes>
+            )}
+          </AnimatePresence>
+        </Router>
+      </ThemeGate>
     </ThemeProvider>
   );
 }
