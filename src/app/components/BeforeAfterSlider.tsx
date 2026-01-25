@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
-import { useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
+
+// FIXED PATHS: Go up from components (../), up from app (../), then into lib
+import { useTheme } from '../../lib/ThemeContext';
+import { cn } from '../../lib/utils';
 
 export function BeforeAfterSlider() {
   const { isDark } = useTheme();
