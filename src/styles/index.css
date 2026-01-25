@@ -7,11 +7,8 @@
     --background: #050505;
     --foreground: #ffffff;
     --accent: #A855F7;
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', sans-serif;
   }
 
-  /* Triggered by ThemeContext/Gate */
   .light {
     --background: #ffffff;
     --foreground: #09090b;
@@ -21,24 +18,19 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-body);
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0;
-    -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+  }
+}
+
+/* Force hide system cursor on all elements for desktop */
+@media (min-width: 768px) {
+  html, body, a, button, * {
+    cursor: none !important;
   }
 }
 
 html {
   scroll-behavior: smooth;
-  cursor: none !important; /* Force hide everywhere on desktop */
-}
-
-@media (max-width: 768px) {
-  html { cursor: auto !important; }
-}
-
-::selection {
-  background: var(--accent);
-  color: white;
 }
