@@ -1,40 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+NZ:wght@100..400&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --cursor-color: white;
-    /* FIXED: Mapping the variables your tailwind.config.ts expects */
+    --background: #050505;
+    --foreground: #ffffff;
+    --accent: #A855F7;
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
-    --font-interface: 'Inter', monospace;
-    --font-accent: 'Space Grotesk', sans-serif;
+  }
+
+  /* Triggered by ThemeContext/Gate */
+  .light {
+    --background: #ffffff;
+    --foreground: #09090b;
+    --accent: #3B82F6;
   }
 
   body {
-    @apply bg-[#050505] text-white;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-body);
+    transition: background-color 0.5s ease, color 0.5s ease;
     margin: 0;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     overflow-x: hidden;
   }
 }
 
 html {
   scroll-behavior: smooth;
-  cursor: none; 
+  cursor: none !important; /* Force hide everywhere on desktop */
 }
 
-/* Custom Selection Color */
+@media (max-width: 768px) {
+  html { cursor: auto !important; }
+}
+
 ::selection {
-  background: #ffffff;
-  color: #000000;
+  background: var(--accent);
+  color: white;
 }
-
-/* Scrollbar Styles ... (Keep your existing scrollbar CSS here) */
