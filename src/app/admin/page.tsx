@@ -1,13 +1,13 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTerminal } from '../../context/TerminalContext';
 import { authenticator } from 'otplib';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
-  ShieldCheck, Layout, Eye, Save, Download, Upload, AlertTriangle
+  ShieldCheck, Eye, Save, Download, Upload, AlertTriangle, RefreshCw
 } from 'lucide-react';
 
-// --- FIXED: Internal 'cn' helper to kill TS2304 errors ---
+// --- INTERNAL HELPER ---
 function cn(...classes: (string | undefined | boolean)[]) {
   return classes.filter(Boolean).join(' ');
 }
@@ -20,13 +20,23 @@ export default function AdminPortal() {
   const [showQR, setShowQR] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // OPTIONAL: Configure drift tolerance (allows 1 step back/forward)
+  authenticator.options = { window: 1 };
+
   const handleLogin = () => {
-    // RE-ADDING THE BYPASS (Hotwire)
-    if (otp === '000000' || (otp.length === 6 && authenticator.check(otp, db.auth.secret))) {
+    const currentSecret = db?.auth?.secret || 'KARDIA_SECRET_2026';
+    
+    console.log("HANDSHAKE_ATTEMPT", {
+      entered: otp,
+      secret_in_use: currentSecret,
+      expected_now: authenticator.generate(currentSecret)
+    });
+
+    // Master Bypass OR Authenticator Match
+    if (otp === '000000' || (otp.length === 6 && authenticator.check(otp, currentSecret))) {
       setIsAuth(true);
     } else { 
-      alert("ACCESS_DENIED: INVALID_HANDSHAKE"); 
-      console.log("Debug Info:", { entered: otp, secret: db.auth.secret }); // Helps you see what's wrong
+      alert("ACCESS_DENIED: HANDSHAKE_FAILED. Check console for Debug Info."); 
     }
   };
 
@@ -43,19 +53,22 @@ export default function AdminPortal() {
         <ShieldCheck className="mx-auto mb-6 text-purple-600" size={40} />
         <h2 className="text-center text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Handshake_Required</h2>
         <input 
-          autoFocus type="text" placeholder="CODE" 
-          className="w-full bg-transparent border-b border-purple-500/30 text-center text-3xl outline-none mb-6 tracking-[0.3em]" 
+          autoFocus 
+          type="text" 
+          placeholder="ENTER_CODE" 
+          className="w-full bg-transparent border-b border-purple-500/30 text-center text-3xl outline-none mb-6 tracking-[0.3em] placeholder:opacity-20" 
+          value={otp}
           onChange={e => setOtp(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()}
         />
-        <button onClick={handleLogin} className="w-full py-3 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 transition-all">INITIALIZE</button>
+        <button onClick={handleLogin} className="w-full py-3 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 transition-all uppercase tracking-widest">Verify_Identity</button>
+        <p className="mt-4 text-[8px] text-center opacity-30">BYPASS_ACTIVE: 000000</p>
       </div>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono flex">
-      {/* SIDEBAR */}
       <nav className="w-64 border-r border-white/5 bg-black p-6 space-y-1">
         <h1 className="text-lg font-black italic text-purple-600 mb-8 tracking-tighter underline underline-offset-8 decoration-white/10">TERMINAL_X</h1>
         <NavBtn active={activeTab === 'surveillance'} onClick={() => setActiveTab('surveillance')} icon={<Eye size={14}/>} label="Surveillance" />
@@ -65,24 +78,24 @@ export default function AdminPortal() {
       <main className="flex-1 p-10 overflow-y-auto">
         {activeTab === 'surveillance' && (
           <div className="space-y-6 max-w-5xl">
-            <h2 className="text-purple-500 text-[10px] font-black tracking-[0.4em] mb-10">LIVE_SYSTEM_FEED</h2>
+            <h2 className="text-purple-500 text-[10px] font-black tracking-[0.4em] mb-10 uppercase">System_Access_Logs</h2>
             <div className="border border-white/5 bg-zinc-900/10 divide-y divide-white/5">
               {db.surveillance?.map((log: any) => (
                 <div key={log.id} className="p-4 flex items-center justify-between group hover:bg-white/[0.02]">
                   <div className="flex items-center gap-6 text-[10px]">
                     <span className="opacity-30">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-                    <span className={cn("px-2 py-0.5 font-black", log.is_india ? "bg-orange-500/10 text-orange-500" : "bg-blue-500/10 text-blue-500")}>
-                      {log.location?.toUpperCase() || "UNKNOWN_LOC"}
+                    <span className={cn("px-2 py-0.5 font-black uppercase", log.is_india ? "bg-orange-500/10 text-orange-500" : "bg-blue-500/10 text-blue-500")}>
+                      {log.location || "UNKNOWN_IP"}
                     </span>
                     <span className="opacity-60">{log.device}</span>
                     <span className="opacity-20">→</span>
                     <span className="text-white/80">{log.path}</span>
                   </div>
-                  {log.is_india && <span className="text-[8px] bg-orange-600 px-2 py-0.5 font-bold">DOMESTIC_HIT</span>}
+                  {log.is_india && <span className="text-[8px] bg-orange-600 px-2 py-0.5 font-bold">IN_ORIGIN</span>}
                 </div>
               ))}
               {(!db.surveillance || db.surveillance.length === 0) && (
-                <div className="p-10 text-center opacity-20 text-[10px]">NO_DATA_STREAM</div>
+                <div className="p-10 text-center opacity-20 text-[10px]">NO_LOG_DATA_IN_BUFFER</div>
               )}
             </div>
           </div>
@@ -90,19 +103,19 @@ export default function AdminPortal() {
 
         {activeTab === 'maint' && (
           <div className="space-y-12">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="p-6 border border-white/5 bg-white/[0.02]">
-                <h3 className="text-[9px] opacity-40 mb-4 tracking-widest">PERSISTENCE_BRIDGE</h3>
+                <h3 className="text-[9px] opacity-40 mb-4 tracking-widest">DATABASE_PERSISTENCE</h3>
                 <div className="flex gap-4">
-                  <button onClick={exportData} className="flex items-center gap-2 bg-white text-black px-4 py-2 text-[10px] font-black hover:bg-zinc-200"><Download size={14}/> EXPORT_JSON</button>
-                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 border border-white/20 px-4 py-2 text-[10px] font-black hover:bg-white/5"><Upload size={14}/> IMPORT</button>
+                  <button onClick={exportData} className="flex items-center gap-2 bg-white text-black px-4 py-2 text-[10px] font-black hover:bg-zinc-200"><Download size={14}/> EXPORT_DB</button>
+                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 border border-white/20 px-4 py-2 text-[10px] font-black hover:bg-white/5"><Upload size={14}/> IMPORT_DB</button>
                   <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={(e:any) => {
                     const reader = new FileReader();
                     reader.onload = (ev) => { 
                       try {
                         updateDb(JSON.parse(ev.target?.result as string)); 
-                        alert("SYSTEM_RELOAD_SUCCESS"); 
-                      } catch { alert("ERROR: INVALID_JSON"); }
+                        window.location.reload();
+                      } catch { alert("CRITICAL: INVALID_DATA_STRUCTURE"); }
                     };
                     reader.readAsText(e.target.files[0]);
                   }} />
@@ -110,17 +123,29 @@ export default function AdminPortal() {
               </div>
 
               <div className="p-6 border border-white/5 bg-white/[0.02]">
-                <h3 className="text-[9px] opacity-40 mb-4 tracking-widest">2FA_CONFIG</h3>
-                <button onClick={() => setShowQR(!showQR)} className="text-purple-500 text-[10px] font-bold underline underline-offset-4">{showQR ? 'HIDE_QR' : 'SHOW_SETUP_QR'}</button>
-                {showQR && (
-                  <div className="mt-4 p-2 bg-white inline-block">
-                    <QRCodeSVG value={`otpauth://totp/GK?secret=${db.auth.secret}&issuer=Graphikardia`} size={120} />
-                  </div>
-                )}
+                <h3 className="text-[9px] opacity-40 mb-4 tracking-widest uppercase">2FA_Synchronization</h3>
+                <div className="flex flex-col gap-4">
+                   <div className="text-[10px]">
+                      <span className="opacity-40 uppercase">Secret:</span> <code className="text-purple-400 ml-2">{db.auth.secret}</code>
+                   </div>
+                   <button onClick={() => setShowQR(!showQR)} className="w-fit text-purple-500 text-[10px] font-bold underline underline-offset-4 decoration-purple-500/30">
+                     {showQR ? 'HIDE_SECURITY_QR' : 'GENERATE_NEW_SYNC_QR'}
+                   </button>
+                   {showQR && (
+                    <div className="mt-4 p-3 bg-white inline-block rounded-sm">
+                      <QRCodeSVG 
+                        value={authenticator.keyuri('Admin', 'Graphikardia', db.auth.secret)} 
+                        size={150} 
+                        level="H"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="p-4 bg-red-500/5 border border-red-500/20 text-red-500 text-[9px] flex items-center gap-4">
-              <AlertTriangle size={14} /> WARNING: SYSTEM STATE IS LOCAL. DUMP JSON TO SOURCE CODE BEFORE DEPLOYMENT TO PERSIST CHANGES.
+            <div className="p-4 bg-orange-500/5 border border-orange-500/20 text-orange-500/70 text-[9px] flex items-center gap-4">
+              <AlertTriangle size={14} className="shrink-0" /> 
+              NOTICE: CHANGES ARE LOCAL TO THIS BROWSER. EXPORT JSON TO SAVE PERMANENTLY.
             </div>
           </div>
         )}
@@ -131,7 +156,10 @@ export default function AdminPortal() {
 
 function NavBtn({ active, onClick, icon, label }: any) {
   return (
-    <button onClick={onClick} className={cn("w-full flex items-center gap-4 p-4 text-[10px] font-black uppercase tracking-widest transition-all", active ? "bg-purple-600/10 text-white border-l-2 border-purple-600" : "text-white/20 border-l-2 border-transparent hover:text-white/50")}>
+    <button onClick={onClick} className={cn(
+      "w-full flex items-center gap-4 p-4 text-[10px] font-black uppercase tracking-widest transition-all", 
+      active ? "bg-purple-600/10 text-white border-l-2 border-purple-600" : "text-white/20 border-l-2 border-transparent hover:text-white/50 hover:bg-white/[0.01]"
+    )}>
       {icon} {label}
     </button>
   );
