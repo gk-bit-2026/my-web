@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Plus, Check, ArrowRight } from 'lucide-react';
-import { useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
+import { useTheme } from '../../lib/ThemeContext';
+import { cn } from '../../lib/utils';
 
 interface ProductVaultProps {
   onAdd: (item: any) => void;
