@@ -11,7 +11,7 @@ export function CustomCursor() {
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
+  const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const x = useSpring(mouseX, springConfig);
   const y = useSpring(mouseY, springConfig);
 
@@ -42,28 +42,27 @@ export function CustomCursor() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[1000000] hidden md:block" style={{ isolation: 'isolate' }}>
-      {/* 1. Theme Halo: Subtle glow that changes color */}
+    <div 
+      className="fixed inset-0 pointer-events-none hidden md:block" 
+      style={{ zIndex: 1000000, isolation: 'isolate' }}
+    >
+      {/* 1. THE CORE - Explicitly Black in Light Mode, White in Dark Mode */}
       <motion.div
-        className="absolute w-24 h-24 rounded-full blur-3xl"
+        className="absolute w-4 h-4 rounded-full border border-white/20 shadow-xl"
         style={{ 
           x, y, translateX: '-50%', translateY: '-50%',
-          background: isDark ? '#A855F7' : '#3B82F6',
-          opacity: isDark ? 0.2 : 0.15 
+          backgroundColor: isDark ? '#ffffff' : '#000000', // NO MORE BLEND GUESSWORK
         }}
-      />
-
-      {/* 2. Main Core: White + Difference = Black on Light Mode */}
-      <motion.div
-        className="absolute w-4 h-4 rounded-full bg-white mix-blend-difference border-[0.5px] border-white/10"
-        style={{ x, y, translateX: '-50%', translateY: '-50%' }}
         animate={{ scale: hovered ? 2.5 : 1 }}
       />
       
-      {/* 3. Morphing Ring: thicker border for visibility */}
+      {/* 2. THE RING - Contrasts against the core */}
       <motion.div
-        className="absolute w-9 h-9 border-[1.5px] border-white mix-blend-difference"
-        style={{ x, y, translateX: '-50%', translateY: '-50%' }}
+        className="absolute w-9 h-9 border-[1.5px]"
+        style={{ 
+          x, y, translateX: '-50%', translateY: '-50%',
+          borderColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+        }}
         animate={{
           scale: hovered ? 1.6 : 1,
           borderRadius: hovered ? '20%' : '50%',
