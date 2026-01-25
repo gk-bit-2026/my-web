@@ -1,6 +1,9 @@
+'use client';
 import { motion } from 'framer-motion';
 import { Quote, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+// 1. Import Theme Hook
+import { useTheme } from '../lib/ThemeContext'; 
 
 const reviews = [
   { id: 1, name: 'Sarah Chen', role: 'CMO', company: 'Aether Intel', quote: "Graphikardia decoded our entire market position. Growth was immediate and sustained.", stat: "+140% ROI" },
@@ -8,9 +11,12 @@ const reviews = [
   { id: 3, name: 'Elena Rossi', role: 'Brand Lead', company: 'Vanguard', quote: "They don't just build sites; they build digital empires.", stat: "5.2x Leads" }
 ];
 
-export default function TestimonialsPage({ isDark }: { isDark: boolean }) {
+export default function TestimonialsPage() { // 2. Removed Prop requirement
+  const { isDark } = useTheme(); // 3. Consume Context
+
   return (
     <section className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+      {/* ... keep original JSX, it uses isDark correctly now ... */}
       <div className="mb-20">
         <Link to="/" className="text-xs font-mono uppercase tracking-widest opacity-50 hover:opacity-100 flex items-center gap-2 mb-8">
           <ArrowUpRight className="rotate-180" size={14} /> Back to Hub
@@ -38,7 +44,7 @@ export default function TestimonialsPage({ isDark }: { isDark: boolean }) {
             
             <div className="flex justify-between items-end">
               <div>
-                <h4 className="font-cursive text-2xl mb-1" style={{ fontFamily: '"Playwrite NZ", cursive' }}>{r.name}</h4>
+                <h4 className="font-bold text-2xl mb-1">{r.name}</h4>
                 <p className="text-[10px] font-mono uppercase tracking-widest opacity-60">{r.company} / {r.role}</p>
               </div>
               <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${isDark ? 'bg-white text-black' : 'bg-black text-white'}`}>
