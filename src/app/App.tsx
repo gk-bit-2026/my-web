@@ -5,8 +5,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // FIXED IMPORTS: Using relative paths to ensure Vercel finds the files
-import { ThemeProvider, useTheme } from './lib/ThemeContext'; 
-import { cn } from './lib/utils';
+import { ThemeProvider, useTheme } from './ThemeContext'; 
+import { cn } from './utils';
 
 import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
