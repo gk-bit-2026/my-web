@@ -22,7 +22,7 @@ export default function AdminPortal() {
 
   const handleLogin = () => {
     // 000000 is your master bypass for first-time setup
-    if (otp === '000000' || (otp.length === 6 && authenticator.check(otp, db.auth.secret))) {
+    if ( (otp.length === 6 && authenticator.check(otp, db.auth.secret))) {
       setIsAuth(true);
     } else { 
       alert("ACCESS_DENIED: INVALID_HANDSHAKE"); 
