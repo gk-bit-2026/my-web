@@ -2,8 +2,8 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
+import { useTheme } from '../../lib/ThemeContext';
+import { cn } from '../../lib/utils';
 
 export function HeroSection() {
   const { isDark } = useTheme();
