@@ -1,10 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app/App.tsx';
-import './styles/index.css'; // FIXED: Pointing to the styles folder
+import './styles/index.css'; 
+// 1. IMPORT YOUR CONTEXT (Adjust path if needed)
+import { TerminalProvider } from './context/TerminalContext'; 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    {/* 2. WRAP THE APP HERE */}
+    <TerminalProvider>
+      <App />
+    </TerminalProvider>
   </React.StrictMode>,
 );
