@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Send, Activity } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
+import { useTheme } from '../../lib/ThemeContext';
+import { cn } from '../../lib/utils';
 
 interface ImpactSidebarProps {
   isOpen: boolean;
