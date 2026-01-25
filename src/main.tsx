@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app/App.tsx';
 import './styles/index.css'; 
-// 1. IMPORT YOUR CONTEXT
+// 1. IMPORT YOUR CONTEX
 import { TerminalProvider } from './context/TerminalContext'; 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
