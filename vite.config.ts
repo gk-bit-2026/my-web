@@ -5,12 +5,11 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-   alias: {
-  '@': path.resolve(__dirname, './src/app'),
-  '@/lib': path.resolve(__dirname, './src/lib'),
-},
+    alias: {
+      // This maps @ to the src/app folder
+      '@': path.resolve(__dirname, './src/app'),
+      // This specifically maps @/lib to the src/lib folder
+      '@/lib': path.resolve(__dirname, './src/lib'),
+    },
   },
-  server: {
-    host: true, // Exposes to network for mobile testing
-  }
 });
