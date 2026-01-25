@@ -1,4 +1,7 @@
+'use client';
+
 import { motion } from 'framer-motion';
+import { useTheme } from '@/lib/ThemeContext';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -7,7 +10,9 @@ const steps = [
   { id: '03', title: 'Kinetic Launch', desc: 'Deploying high-velocity assets across the digital matrix to trigger immediate growth.' }
 ];
 
-export function KardiaMethodology({ isDark }: { isDark: boolean }) {
+export function KardiaMethodology() {
+  const { isDark } = useTheme();
+
   return (
     <section className={cn(
       "py-32 px-6 border-t transition-colors duration-500",
@@ -15,7 +20,6 @@ export function KardiaMethodology({ isDark }: { isDark: boolean }) {
     )}>
       <div className="max-w-7xl mx-auto">
         <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-20 opacity-50">The Methodology</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {steps.map((step, i) => (
             <motion.div 
