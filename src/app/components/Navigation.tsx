@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sun, Moon, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 
 export function Navigation({ isDark, setIsDark, cartCount, openSidebar }: any) {
   const [isScrolled, setIsScrolled] = useState(false);
