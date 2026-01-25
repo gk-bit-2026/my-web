@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { Instagram, AtSign, User, Mail, Check, Copy, Send, Loader2 } from 'lucide-react';
-import logoWhite from '@/assets/logo2.png';
+import logoWhite from '../../assets/logo2.png';
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbztfYnOUTNXbgTBIfj0w2hMjpmsPKAp5HPQRa7tj1VBFD9rFc2s5HHJAXiQ89X6qcK2zA/exec";
 const EMAIL = "impact@graphikardia.com";
