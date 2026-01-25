@@ -21,11 +21,12 @@ export default function AdminPortal() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = () => {
-    // 000000 is your master bypass for first-time setup
-    if ( (otp.length === 6 && authenticator.check(otp, db.auth.secret))) {
+    // RE-ADDING THE BYPASS (Hotwire)
+    if (otp === '000000' || (otp.length === 6 && authenticator.check(otp, db.auth.secret))) {
       setIsAuth(true);
     } else { 
       alert("ACCESS_DENIED: INVALID_HANDSHAKE"); 
+      console.log("Debug Info:", { entered: otp, secret: db.auth.secret }); // Helps you see what's wrong
     }
   };
 
