@@ -6,7 +6,7 @@ import { AnimatePresence } from 'framer-motion';
 // Pages & Components
 import WorkPage from './WorkPage';
 import TestimonialsPage from './TestimonialsPage';
-import AdminPortal from './app/admin/page'; 
+import AdminPortal from './admin/page'; 
 import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
 import { KardiaMethodology } from './components/KardiaMethodology';
