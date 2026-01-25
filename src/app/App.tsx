@@ -1,18 +1,21 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
 
-// Components
-import { Navigation } from '@/components/Navigation';
-import { HeroSection } from '@/components/HeroSection';
-import { KardiaMethodology } from '@/components/KardiaMethodology';
-import { ProductVault } from '@/components/ProductVault';
-import { BeforeAfterSlider } from '@/components/BeforeAfterSlider';
-import { FooterCTA } from '@/components/FooterCTA';
-import { LoadingScreen } from '@/components/LoadingScreen';
-import { ImpactSidebar } from '@/components/ImpactSidebar';
+// FIXED IMPORTS: Using relative paths to ensure Vercel finds the files
+import { ThemeProvider, useTheme } from './lib/ThemeContext'; 
+import { cn } from './lib/utils';
+
+import { Navigation } from './components/Navigation';
+import { HeroSection } from './components/HeroSection';
+import { KardiaMethodology } from './components/KardiaMethodology';
+import { ProductVault } from './components/ProductVault';
+import { BeforeAfterSlider } from './components/BeforeAfterSlider';
+import { FooterCTA } from './components/FooterCTA';
+import { LoadingScreen } from './components/LoadingScreen';
+import { ImpactSidebar } from './components/ImpactSidebar';
 
 function MainLayout() {
   const { isDark } = useTheme();
@@ -39,7 +42,12 @@ function MainLayout() {
         <BeforeAfterSlider />
         <FooterCTA />
       </main>
-      <ImpactSidebar isOpen={isSidebarOpen} items={cart} onRemove={(id) => setCart(cart.filter(i => i.id !== id))} onClose={() => setIsSidebarOpen(false)} />
+      <ImpactSidebar 
+        isOpen={isSidebarOpen} 
+        items={cart} 
+        onRemove={(id) => setCart(cart.filter(i => i.id !== id))} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
     </div>
   );
 }
