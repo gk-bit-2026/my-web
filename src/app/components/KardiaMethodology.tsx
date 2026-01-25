@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useTheme } from '@/lib/ThemeContext';
-import { cn } from '@/lib/utils';
+import { useTheme } from '../../lib/ThemeContext';
+import { cn } from '../../lib/utils';
 
 const steps = [
   { id: '01', title: 'Deconstruction', desc: 'We strip your brand to its core logic, identifying every friction point holding back your revenue.' },
