@@ -1,3 +1,8 @@
+// 1. ADD THIS AT THE VERY TOP
+if (typeof window !== 'undefined') {
+  (window as any).global = window;
+}
+
 'use client';
 import { useState, useRef } from 'react';
 import { useTerminal } from '../context/TerminalContext';
