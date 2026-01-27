@@ -4,7 +4,7 @@ if (typeof window !== 'undefined') {
 }
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTerminal } from '../context/TerminalContext';
 // @ts-ignore
 import { authenticator } from '@otplib/preset-browser';
@@ -21,42 +21,45 @@ export default function AdminPortal() {
   const [showQR, setShowQR] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // --- SCOPE FIX: Move safeSecret here so both handleLogin and JSX can see it ---
-  const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
-  const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
-
-  useEffect(() => {
-    console.log("Portal Initialized. Database Status:", db ? "LOADED" : "MISSING");
-  }, [db]);
+  // OPTIMIZATION: Memoize secret to prevent recalculation on every keystroke
+  const safeSecret = useMemo(() => {
+    const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
+    return rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
+  }, [db?.auth?.secret]);
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (isVerifying) return;
+
     setIsVerifying(true);
 
-    const cleanOtp = otp.trim();
-    
-    if (cleanOtp === '000000') {
-      setIsAuth(true);
-      setIsVerifying(false);
-      return;
-    }
-
-    try {
-      const expectedToken = authenticator.generate(safeSecret);
-      console.log("Auth Data:", { input: cleanOtp, expected: expectedToken });
-
-      const isValid = authenticator.check(cleanOtp, safeSecret, { window: 1 });
+    // THREAD YIELD: Prevents [Violation] 'click' handler took Xms
+    // This allows the Loader2 spinner to render BEFORE the math starts
+    setTimeout(() => {
+      const cleanOtp = otp.trim();
       
-      if (isValid) {
+      if (cleanOtp === '000000') {
         setIsAuth(true);
-      } else {
-        alert(`ACCESS_DENIED: Expected ${expectedToken}.`);
+        setIsVerifying(false);
+        return;
       }
-    } catch (err: any) {
-      alert(`SYSTEM_ERROR: ${err.message}`);
-    } finally {
-      setIsVerifying(false);
-    }
+
+      try {
+        const isValid = authenticator.check(cleanOtp, safeSecret, { window: 1 });
+        
+        if (isValid) {
+          setIsAuth(true);
+        } else {
+          const expected = authenticator.generate(safeSecret);
+          console.log("Handshake Failed. Expected:", expected);
+          alert(`ACCESS_DENIED: Handshake mismatch.`);
+        }
+      } catch (err: any) {
+        alert(`SYSTEM_ERROR: ${err.message}`);
+      } finally {
+        setIsVerifying(false);
+      }
+    }, 50); 
   };
 
   if (!isAuth) {
@@ -64,13 +67,19 @@ export default function AdminPortal() {
       <div className="h-screen bg-black flex items-center justify-center font-mono text-white p-4">
         <form onSubmit={handleLogin} className="w-full max-w-sm border border-purple-500/20 p-8 bg-zinc-900/10 backdrop-blur-md text-center">
           <ShieldCheck className="mx-auto mb-6 text-purple-600 animate-pulse" size={40} />
-          <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Secure_Handshake_v2.0</h2>
+          <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Secure_Handshake_v3.0</h2>
+          
           <input 
             id="otp-field" name="otp-field" autoFocus type="text" autoComplete="one-time-code" inputMode="numeric" placeholder="000000" 
             className="w-full bg-transparent border-b border-purple-500/30 text-center text-4xl outline-none mb-6 tracking-[0.2em] focus:border-purple-600" 
             value={otp} onChange={e => setOtp(e.target.value)}
           />
-          <button type="submit" disabled={isVerifying} className="w-full py-4 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 disabled:bg-zinc-800 transition-all uppercase tracking-widest flex items-center justify-center gap-2">
+
+          <button 
+            type="submit" 
+            disabled={isVerifying} 
+            className="w-full py-4 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 disabled:bg-zinc-800 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+          >
             {isVerifying ? <Loader2 className="animate-spin" size={14} /> : "Verify_Identity"}
           </button>
         </form>
@@ -80,6 +89,7 @@ export default function AdminPortal() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono flex">
+      {/* SIDEBAR */}
       <nav className="w-64 border-r border-white/5 bg-black p-6 space-y-1">
         <div className="mb-10 px-2">
             <h1 className="text-xl font-black italic text-purple-600 tracking-tighter">TERMINAL_X</h1>
