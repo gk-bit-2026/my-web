@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import { useTerminal } from '../context/TerminalContext';
 // CRITICAL: Use the browser-optimized build to prevent "SYSTEM_ERROR"
-import { authenticator } from 'otplib/browser';
+import { authenticator } from '@otplib/preset-browser';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
   ShieldCheck, Layout, Target, Save, Video, Image as ImageIcon, 
