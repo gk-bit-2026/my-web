@@ -27,21 +27,41 @@ export default function AdminPortal() {
 
   const handleLogin = () => {
     const cleanOtp = otp.trim();
+    
+    // 1. EMERGENCY BYPASS
     if (cleanOtp === '000000') {
+      console.log("Bypass used.");
       setIsAuth(true);
       return;
     }
 
+    // 2. SANITIZE SECRET
+    // Ensures we only use A-Z and 2-7 (Base32 standard)
     const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
     const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
 
     try {
-      if (authenticator.check(cleanOtp, safeSecret)) {
+      // 3. DEBUG: GENERATE THE EXPECTED CODE
+      // This prints the "Correct Answer" to the console
+      const expectedToken = authenticator.generate(safeSecret);
+      
+      console.log("--- DEBUG AUTH ---");
+      console.log("Using Secret:", safeSecret);
+      console.log("Your Input:", cleanOtp);
+      console.log("Expected Code:", expectedToken); // <--- LOOK FOR THIS IN CONSOLE
+      console.log("Time Remaining:", authenticator.timeRemaining(), "seconds");
+
+      // Check strictly against the library
+      const isValid = authenticator.check(cleanOtp, safeSecret);
+      
+      if (isValid) {
         setIsAuth(true);
       } else {
-        alert("ACCESS_DENIED: INVALID_HANDSHAKE");
+        // Alert the user to look at the console
+        alert(`ACCESS_DENIED. Expected: ${expectedToken} (See Console F12)`);
       }
     } catch (e: any) {
+      console.error("CRASH:", e);
       alert(`SYSTEM_ERROR: ${e.message}`);
     }
   };
@@ -61,6 +81,7 @@ export default function AdminPortal() {
           <button onClick={handleLogin} className="w-full py-3 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 transition-all uppercase tracking-widest">
             Verify_Identity
           </button>
+          <p className="mt-4 text-[8px] text-white/20 uppercase tracking-widest">Debug Mode Active</p>
         </div>
       </div>
     );
