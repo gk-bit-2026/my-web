@@ -1,4 +1,4 @@
-// 1. GLOBAL POLYFILL: Crucial for browser-side TOTP libraries
+// 1. GLOBAL POLYFILL
 if (typeof window !== 'undefined') {
   (window as any).global = window;
 }
@@ -21,52 +21,38 @@ export default function AdminPortal() {
   const [showQR, setShowQR] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // LOGGING COMPONENT STATE FOR DEBUGGING
+  // --- SCOPE FIX: Move safeSecret here so both handleLogin and JSX can see it ---
+  const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
+  const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
+
   useEffect(() => {
     console.log("Portal Initialized. Database Status:", db ? "LOADED" : "MISSING");
   }, [db]);
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    console.log("--- STARTING HANDSHAKE ---");
     setIsVerifying(true);
 
     const cleanOtp = otp.trim();
     
-    // 1. EMERGENCY BYPASS
     if (cleanOtp === '000000') {
-      console.log("Bypass triggered.");
       setIsAuth(true);
       setIsVerifying(false);
       return;
     }
 
-    // 2. SECRET SANITIZATION
-    const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
-    const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
-
     try {
-      // 3. GENERATE EXPECTED TOKEN (FOR DEBUGGING)
       const expectedToken = authenticator.generate(safeSecret);
-      console.log("Auth Data:", {
-        input: cleanOtp,
-        expected: expectedToken,
-        remaining: authenticator.timeRemaining(),
-        secretUsed: safeSecret
-      });
+      console.log("Auth Data:", { input: cleanOtp, expected: expectedToken });
 
-      // 4. VALIDATION WITH 90-SECOND WINDOW (DRIFT TOLERANCE)
       const isValid = authenticator.check(cleanOtp, safeSecret, { window: 1 });
       
       if (isValid) {
-        console.log("Handshake successful.");
         setIsAuth(true);
       } else {
-        console.error("Handshake failed.");
-        alert(`ACCESS_DENIED: Expected ${expectedToken}. Ensure phone and PC are time-synced.`);
+        alert(`ACCESS_DENIED: Expected ${expectedToken}.`);
       }
     } catch (err: any) {
-      console.error("CRITICAL_AUTH_ERROR:", err);
       alert(`SYSTEM_ERROR: ${err.message}`);
     } finally {
       setIsVerifying(false);
@@ -76,37 +62,17 @@ export default function AdminPortal() {
   if (!isAuth) {
     return (
       <div className="h-screen bg-black flex items-center justify-center font-mono text-white p-4">
-        <form 
-          onSubmit={handleLogin}
-          className="w-full max-w-sm border border-purple-500/20 p-8 bg-zinc-900/10 backdrop-blur-md text-center"
-        >
+        <form onSubmit={handleLogin} className="w-full max-w-sm border border-purple-500/20 p-8 bg-zinc-900/10 backdrop-blur-md text-center">
           <ShieldCheck className="mx-auto mb-6 text-purple-600 animate-pulse" size={40} />
           <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Secure_Handshake_v2.0</h2>
-          
           <input 
-            id="otp-field"
-            name="otp-field"
-            autoFocus 
-            type="text" 
-            autoComplete="one-time-code"
-            inputMode="numeric"
-            placeholder="000000" 
-            className="w-full bg-transparent border-b border-purple-500/30 text-center text-4xl outline-none mb-6 tracking-[0.2em] transition-colors focus:border-purple-600" 
-            value={otp} 
-            onChange={e => setOtp(e.target.value)}
+            id="otp-field" name="otp-field" autoFocus type="text" autoComplete="one-time-code" inputMode="numeric" placeholder="000000" 
+            className="w-full bg-transparent border-b border-purple-500/30 text-center text-4xl outline-none mb-6 tracking-[0.2em] focus:border-purple-600" 
+            value={otp} onChange={e => setOtp(e.target.value)}
           />
-
-          <button 
-            type="submit"
-            disabled={isVerifying}
-            className="w-full py-4 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 disabled:bg-zinc-800 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
-          >
+          <button type="submit" disabled={isVerifying} className="w-full py-4 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 disabled:bg-zinc-800 transition-all uppercase tracking-widest flex items-center justify-center gap-2">
             {isVerifying ? <Loader2 className="animate-spin" size={14} /> : "Verify_Identity"}
           </button>
-          
-          <p className="mt-6 text-[7px] text-white/20 uppercase tracking-[0.2em]">
-            Time_Sync_Status: {new Date().toLocaleTimeString()}
-          </p>
         </form>
       </div>
     );
@@ -114,7 +80,6 @@ export default function AdminPortal() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono flex">
-      {/* SIDEBAR */}
       <nav className="w-64 border-r border-white/5 bg-black p-6 space-y-1">
         <div className="mb-10 px-2">
             <h1 className="text-xl font-black italic text-purple-600 tracking-tighter">TERMINAL_X</h1>
@@ -125,7 +90,6 @@ export default function AdminPortal() {
         <NavBtn active={activeTab === 'maint'} onClick={() => setActiveTab('maint')} icon={<Save size={14}/>} label="Maintenance" />
       </nav>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 overflow-y-auto">
         <div className="h-12 border-b border-white/5 flex items-center justify-between px-8 text-[9px] uppercase tracking-widest bg-zinc-900/5">
           <span className="text-green-500">System_Status: Optimal</span>
@@ -134,7 +98,7 @@ export default function AdminPortal() {
 
         <div className="p-10">
           {activeTab === 'surveillance' && (
-            <div className="space-y-8">
+            <div className="space-y-8 animate-in fade-in duration-700">
               <div className="grid grid-cols-3 gap-6">
                 <StatCard label="Live_Nodes_IN" value="1,240" color="text-green-500" />
                 <StatCard label="Avg_Latency" value="18ms" color="text-purple-500" />
@@ -167,7 +131,6 @@ export default function AdminPortal() {
           {activeTab === 'maint' && (
             <div className="p-6 border border-white/5 bg-white/[0.02] max-w-sm">
               <h3 className="text-[9px] opacity-40 mb-4 tracking-widest uppercase">2FA_Sync_Portal</h3>
-              <p className="text-[10px] mb-6 text-white/60">If your mobile app codes don't match, re-scan this QR code to re-sync with this specific terminal node.</p>
               <button onClick={() => setShowQR(!showQR)} className="text-purple-500 text-[10px] font-bold underline mb-4 block">
                 {showQR ? 'HIDE_QR_CODE' : 'SHOW_RE_SYNC_QR'}
               </button>
