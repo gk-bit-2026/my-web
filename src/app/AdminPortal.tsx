@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import { useTerminal } from '../context/TerminalContext';
-// CRITICAL: Use the browser-optimized build to prevent "SYSTEM_ERROR"
+// @ts-ignore - Fixes TS7016 by ignoring missing declaration files
 import { authenticator } from '@otplib/preset-browser';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
@@ -16,11 +16,9 @@ export default function AdminPortal() {
   const [otp, setOtp] = useState('');
   const [showQR, setShowQR] = useState(false);
   
-  // Analytics State
   const [targetUrl, setTargetUrl] = useState('');
   const [scanResult, setScanResult] = useState<any>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = () => {
     const cleanOtp = otp.trim();
@@ -36,8 +34,8 @@ export default function AdminPortal() {
     const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
 
     try {
-      // 3. SECURE HANDSHAKE
-      const isValid = cleanOtp.length === 6 && authenticator.check(cleanOtp, safeSecret);
+      // 3. HANDSHAKE (otplib version 12 logic)
+      const isValid = authenticator.check(cleanOtp, safeSecret);
       if (isValid) {
         setIsAuth(true);
       } else {
@@ -45,7 +43,7 @@ export default function AdminPortal() {
       }
     } catch (e: any) {
       console.error("AUTH_CRASH:", e);
-      alert(`SYSTEM_ERROR: ${e.message}. Use 000000 to bypass and fix secret.`);
+      alert(`SYSTEM_ERROR: ${e.message}. Use 000000 to bypass.`);
     }
   };
 
@@ -107,16 +105,6 @@ export default function AdminPortal() {
             </div>
           )}
 
-          {activeTab === 'editor' && (
-            <div className="max-w-4xl space-y-12 animate-in slide-in-from-bottom-4">
-              <section className="p-8 border border-white/5 bg-zinc-900/10 space-y-6">
-                <h3 className="text-xs font-bold uppercase text-purple-500 tracking-[0.4em]">Node_Content_Override</h3>
-                <input value={db.hero.title} onChange={e => updateDb({...db, hero: {...db.hero, title: e.target.value}})} className="w-full bg-black border border-white/10 p-4 font-black italic text-xl outline-none focus:border-purple-600" />
-                <textarea value={db.about.text} onChange={e => updateDb({...db, about: {text: e.target.value}})} className="w-full bg-black border border-white/10 p-4 h-32 text-sm outline-none focus:border-purple-600" />
-              </section>
-            </div>
-          )}
-
           {activeTab === 'maint' && (
             <div className="grid grid-cols-2 gap-8">
               <div className="p-6 border border-white/5 bg-white/[0.02]">
@@ -125,32 +113,4 @@ export default function AdminPortal() {
                   {showQR ? 'HIDE_QR' : 'GENERATE_NEW_QR'}
                 </button>
                 {showQR && (
-                  <div className="bg-white p-2 inline-block rounded-sm">
-                    <QRCodeSVG value={authenticator.keyuri('Admin', 'Graphikardia', db?.auth?.secret || 'KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K')} size={150} />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function NavBtn({ active, onClick, icon, label }: any) {
-  return (
-    <button onClick={onClick} className={`w-full flex items-center gap-4 p-4 text-[10px] font-bold uppercase tracking-widest transition-all border-l-2 ${active ? 'bg-purple-600/10 text-white border-purple-600' : 'text-white/20 border-transparent hover:text-white hover:bg-white/5'}`}>
-      {icon} {label}
-    </button>
-  );
-}
-
-function StatCard({ label, value, color }: any) {
-  return (
-    <div className="p-6 border border-white/5 bg-zinc-900/20">
-      <p className="text-[8px] opacity-30 uppercase tracking-[0.2em] mb-3">{label}</p>
-      <h4 className={`text-2xl font-black italic ${color}`}>{value}</h4>
-    </div>
-  );
-}
+                  <div className="bg-
