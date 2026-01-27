@@ -1,52 +1,39 @@
+// 1. PRE-REACT LOG - This MUST show up if the file is being read
+console.log("CRITICAL: AdminPortal.tsx file is being read by the browser.");
+
+if (typeof window !== 'undefined') {
+  (window as any).global = window;
+  window.onerror = function(msg, url, line) {
+    console.log("GLOBAL_ERROR_CAUGHT: ", msg, " at line: ", line);
+    return false;
+  };
+}
+
 'use client';
 import { useState } from 'react';
-// @ts-ignore
-import { authenticator } from '@otplib/preset-browser';
-
-if (typeof window !== 'undefined') { (window as any).global = window; }
 
 export default function AdminPortal() {
-  const [isAuth, setIsAuth] = useState(false);
   const [otp, setOtp] = useState('');
 
-  // HARDCODED FOR TESTING - Scanned this into your phone?
-  const TEST_SECRET = "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
+  // 2. RENDER LOG
+  console.log("Portal Component is rendering.");
 
-  const handleLogin = () => {
-    console.log("!!! BUTTON CLICKED !!!");
-    
-    try {
-      const expected = authenticator.generate(TEST_SECRET);
-      console.log("INPUT:", otp);
-      console.log("EXPECTED:", expected);
-
-      if (otp === expected || otp === '000000') {
-        alert("SUCCESS");
-        setIsAuth(true);
-      } else {
-        alert("FAIL: System expected " + expected);
-      }
-    } catch (e: any) {
-      console.error("FATAL ERROR:", e);
-    }
+  const handleImmediateTest = () => {
+    // 3. EVENT LOG
+    console.log("CLICK DETECTED - TIME:", Date.now());
+    alert("Logic is alive. Check console.");
   };
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col items-center justify-center font-mono">
-      <h1 className="mb-4">DEBUG_MODE_ACTIVE</h1>
-      <input 
-        className="bg-zinc-900 border p-4 text-center text-2xl mb-4"
-        value={otp}
-        onChange={e => setOtp(e.target.value)}
-        placeholder="000000"
-      />
+    <div style={{ height: '100vh', background: 'maroon', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <h1>SYSTEM_DIAGNOSTIC_MODE</h1>
+      <p>If you see a Maroon background, the UI is rendering.</p>
       <button 
-        onClick={handleLogin}
-        className="bg-purple-600 px-8 py-4 font-bold uppercase"
+        onClick={handleImmediateTest}
+        style={{ padding: '20px', background: 'white', color: 'black', fontWeight: 'bold', fontSize: '20px' }}
       >
-        Execute_Verify
+        TEST_CONSOLE_LOG
       </button>
-      <p className="mt-4 text-xs text-zinc-500">Check F12 for "!!! BUTTON CLICKED !!!"</p>
     </div>
   );
 }
