@@ -1,17 +1,16 @@
-// 1. ADD THIS AT THE VERY TOP
+// 1. GLOBAL POLYFILL: Fixes "global is not defined" error in browser
 if (typeof window !== 'undefined') {
   (window as any).global = window;
 }
 
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTerminal } from '../context/TerminalContext';
-// @ts-ignore
+// @ts-ignore - Bypass missing type definitions for the browser preset
 import { authenticator } from '@otplib/preset-browser';
 import { QRCodeSVG } from 'qrcode.react';
 import { 
-  ShieldCheck, Layout, Target, Save, Video, Image as ImageIcon, 
-  Trash2, Loader2, Eye, Map as MapIcon
+  ShieldCheck, Layout, Save, Eye, Map as MapIcon 
 } from 'lucide-react';
 
 export default function AdminPortal() {
@@ -20,48 +19,41 @@ export default function AdminPortal() {
   const [isAuth, setIsAuth] = useState(false);
   const [otp, setOtp] = useState('');
   const [showQR, setShowQR] = useState(false);
-  
-  const [targetUrl, setTargetUrl] = useState('');
-  const [scanResult, setScanResult] = useState<any>(null);
-  const [isScanning, setIsScanning] = useState(false);
 
+  /**
+   * HANDSHAKE LOGIC
+   * Validates 6-digit TOTP with time-drift tolerance.
+   */
   const handleLogin = () => {
     const cleanOtp = otp.trim();
     
-    // 1. EMERGENCY BYPASS
+    // EMERGENCY BYPASS: REMOVE IN PRODUCTION
     if (cleanOtp === '000000') {
-      console.log("Bypass used.");
       setIsAuth(true);
       return;
     }
 
-    // 2. SANITIZE SECRET
-    // Ensures we only use A-Z and 2-7 (Base32 standard)
+    // SANITIZE SECRET: Base32 only (A-Z, 2-7)
     const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
     const safeSecret = rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
 
     try {
-      // 3. DEBUG: GENERATE THE EXPECTED CODE
-      // This prints the "Correct Answer" to the console
-      const expectedToken = authenticator.generate(safeSecret);
-      
-      console.log("--- DEBUG AUTH ---");
-      console.log("Using Secret:", safeSecret);
-      console.log("Your Input:", cleanOtp);
-      console.log("Expected Code:", expectedToken); // <--- LOOK FOR THIS IN CONSOLE
-      console.log("Time Remaining:", authenticator.timeRemaining(), "seconds");
+      // DEBUG: Verify expected code in F12 Console
+      const expectedNow = authenticator.generate(safeSecret);
+      console.log("--- AUTH DIAGNOSTICS ---");
+      console.log("PC UTC Time:", new Date().toISOString());
+      console.log("Expected Now:", expectedNow);
 
-      // Check strictly against the library
-      const isValid = authenticator.check(cleanOtp, safeSecret);
+      // VALIDATE: window: 1 allows for +/- 30 seconds of clock drift
+      const isValid = authenticator.check(cleanOtp, safeSecret, { window: 1 });
       
       if (isValid) {
         setIsAuth(true);
       } else {
-        // Alert the user to look at the console
-        alert(`ACCESS_DENIED. Expected: ${expectedToken} (See Console F12)`);
+        alert(`ACCESS_DENIED: Expected ${expectedNow}. Sync your PC clock.`);
       }
     } catch (e: any) {
-      console.error("CRASH:", e);
+      console.error("AUTH_ERROR:", e);
       alert(`SYSTEM_ERROR: ${e.message}`);
     }
   };
@@ -73,15 +65,18 @@ export default function AdminPortal() {
           <ShieldCheck className="mx-auto mb-6 text-purple-600 animate-pulse" size={40} />
           <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Handshake_Required</h2>
           <input 
-            autoFocus type="text" placeholder="ENTER_6_DIGIT_CODE" 
+            autoFocus 
+            type="text" 
+            placeholder="ENTER_6_DIGIT_CODE" 
             className="w-full bg-transparent border-b border-purple-500/30 text-center text-3xl outline-none mb-6 tracking-[0.3em]" 
-            value={otp} onChange={e => setOtp(e.target.value)}
+            value={otp} 
+            onChange={e => setOtp(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
           />
           <button onClick={handleLogin} className="w-full py-3 bg-purple-600 text-[10px] font-bold hover:bg-purple-500 transition-all uppercase tracking-widest">
             Verify_Identity
           </button>
-          <p className="mt-4 text-[8px] text-white/20 uppercase tracking-widest">Debug Mode Active</p>
+          <p className="mt-4 text-[7px] opacity-20 uppercase tracking-tighter">Bypass: 000000</p>
         </div>
       </div>
     );
@@ -89,7 +84,6 @@ export default function AdminPortal() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono flex">
-      {/* SIDEBAR */}
       <nav className="w-64 border-r border-white/5 bg-black p-6 space-y-1">
         <div className="mb-10 px-2">
             <h1 className="text-xl font-black italic text-purple-600 tracking-tighter">TERMINAL_X</h1>
@@ -100,7 +94,6 @@ export default function AdminPortal() {
         <NavBtn active={activeTab === 'maint'} onClick={() => setActiveTab('maint')} icon={<Save size={14}/>} label="Maintenance" />
       </nav>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 overflow-y-auto">
         <div className="h-12 border-b border-white/5 flex items-center justify-between px-8 text-[9px] uppercase tracking-widest bg-zinc-900/5">
           <span className="text-green-500">System_Status: Optimal</span>
