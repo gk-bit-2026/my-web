@@ -21,7 +21,7 @@ export default function AdminPortal() {
   const [showQR, setShowQR] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // OPTIMIZATION: Memoize secret to prevent recalculation on every keystroke
+  // OPTIMIZATION: Memoize secret to stop regex re-running on every keystroke
   const safeSecret = useMemo(() => {
     const rawSecret = db?.auth?.secret || "KVKFKRCPNZQUYMLXOVZGUYLTKBFVE62K";
     return rawSecret.replace(/[^A-Z2-7]/gi, '').toUpperCase();
@@ -29,12 +29,12 @@ export default function AdminPortal() {
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (isVerifying) return;
+    if (isVerifying || otp.length < 6) return;
 
     setIsVerifying(true);
 
-    // THREAD YIELD: Prevents [Violation] 'click' handler took Xms
-    // This allows the Loader2 spinner to render BEFORE the math starts
+    // THREAD YIELD: Prevents the 1.4s "Violation" lag
+    // This allows the Loader icon to render BEFORE the heavy math starts
     setTimeout(() => {
       const cleanOtp = otp.trim();
       
@@ -45,21 +45,22 @@ export default function AdminPortal() {
       }
 
       try {
+        // window: 1 allows for +/- 30 seconds of drift
         const isValid = authenticator.check(cleanOtp, safeSecret, { window: 1 });
         
         if (isValid) {
           setIsAuth(true);
         } else {
           const expected = authenticator.generate(safeSecret);
-          console.log("Handshake Failed. Expected:", expected);
-          alert(`ACCESS_DENIED: Handshake mismatch.`);
+          console.log("Handshake Failure. Expected:", expected);
+          alert(`ACCESS_DENIED: Check your mobile app.`);
         }
       } catch (err: any) {
         alert(`SYSTEM_ERROR: ${err.message}`);
       } finally {
         setIsVerifying(false);
       }
-    }, 50); 
+    }, 50); // 50ms is the sweet spot for browser thread yielding
   };
 
   if (!isAuth) {
@@ -67,7 +68,7 @@ export default function AdminPortal() {
       <div className="h-screen bg-black flex items-center justify-center font-mono text-white p-4">
         <form onSubmit={handleLogin} className="w-full max-w-sm border border-purple-500/20 p-8 bg-zinc-900/10 backdrop-blur-md text-center">
           <ShieldCheck className="mx-auto mb-6 text-purple-600 animate-pulse" size={40} />
-          <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Secure_Handshake_v3.0</h2>
+          <h2 className="text-[9px] tracking-[0.4em] mb-6 opacity-40 uppercase">Secure_Handshake_v3.1</h2>
           
           <input 
             id="otp-field" name="otp-field" autoFocus type="text" autoComplete="one-time-code" inputMode="numeric" placeholder="000000" 
@@ -108,7 +109,7 @@ export default function AdminPortal() {
 
         <div className="p-10">
           {activeTab === 'surveillance' && (
-            <div className="space-y-8 animate-in fade-in duration-700">
+            <div className="space-y-8">
               <div className="grid grid-cols-3 gap-6">
                 <StatCard label="Live_Nodes_IN" value="1,240" color="text-green-500" />
                 <StatCard label="Avg_Latency" value="18ms" color="text-purple-500" />
